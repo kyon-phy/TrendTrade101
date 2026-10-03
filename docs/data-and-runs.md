@@ -12,8 +12,8 @@ The network blocker must be resolved through authorized environment setup. The c
 
 `audit-local` reads existing captured JSON files. Its capture manifest contains:
 
-- Provider, market, frequency, exchange timezone and aware retrieval/as-of timestamp.
-- A calendar file and SHA256, covering all sessions through its declared `complete_through` date, including lunch, auctions and short sessions.
+- Provider, market, frequency, exchange timezone, aware retrieval/as-of timestamp and an explicitly audited `study_start` distinct from warmup history. The daily boundary must implement the approved five-year target; the minute boundary cannot discard earlier audited accessible history.
+- A calendar file and SHA256, covering all sessions from `complete_from` through `complete_through`, including lunch, auctions and short sessions.
 - Every frozen market/frequency member with lot, dataset availability, reason for missing history, issuer's first trade date, source file, SHA256, retrieval timestamp and request parameters.
 - Verified split events with symbol, effective timestamp and ratio; an explicitly reviewed vendor OHLC basis.
 - Evidence-backed review entries for calendar, timestamps, coverage, maximum accessible history, issuer/IPO identity, price adjustments, corporate actions, historical lots and missing data.
@@ -27,9 +27,9 @@ python3 -m trendtrade101 audit-local \
   --output .private/datasets/us-5m
 ```
 
-The resulting package retains raw snapshots privately, normalized bars, immutable hashes, per-symbol diagnostics, actual complete sessions and eligible period ends. Incomplete retrieval-time bars are excluded. Missing observations remain missing. Terminal quotes and auction/lunch intervals are excluded according to the audited calendar, not a universal hardcoded assumption.
+The resulting package retains raw snapshots privately, normalized bars, independently stored executable Opens, immutable hashes, per-symbol diagnostics, actual complete sessions and eligible period ends. A valid Open does not depend on the eventual High, Low, Close or volume. Incomplete retrieval-time bars are excluded from signals, while an Open already observed by that file's retrieval timestamp can remain usable. Missing observations remain missing. Terminal quotes and auction/lunch intervals are excluded according to the audited calendar, not a universal hardcoded assumption.
 
-Historical executable prices use historical share units. If vendor OHLC is verified split-only normalized, audited split factors restore historical executable prices. At each effective split, indicator price state is rescaled and held/pending share quantities are adjusted consistently, preserving notional. Dividend-adjusted fields are rejected. Non-cash distributions and fractional entitlements require a separately resolved model; they are not silently converted to losses, dividends or cash.
+Historical executable prices use historical share units. If vendor OHLC is verified split-only normalized, audited split factors restore historical executable prices. At each effective split, indicator price state is rescaled and held/pending share quantities are adjusted consistently, preserving notional. Pending quantities round down to their legal unit; fractional or odd-lot held entitlements block the current model. Dividend-adjusted fields are rejected. Non-cash distributions require a separately resolved model; they are not silently converted to losses, dividends or cash. The current loader requires evidence for a constant legal unit over the sample and rejects time-varying lot metadata instead of discarding it.
 
 ## Ordered research commands
 
@@ -45,7 +45,7 @@ These commands exist and are tested using deterministic synthetic fixtures. They
 
 Plans bind the configuration, implementation and dataset digests before outcomes. Candidate choices are written before their subsequent test segment. Baseline completion is required before optimization. Training accounts start flat; ordinary OOS folds retain cash, tax ledger and residual positions, while entry targets still use fixed initial capital. If no candidate is eligible, no new positions are opened during that fold; prior pending/residual risk remains managed and reported.
 
-Whole calendar windows are required. Weeks start Monday and months start on day one. Partial leading/trailing periods are excluded. Legitimate earlier observations only warm up indicators and event state. Signal age counts observed valid bars; missing bars are not fabricated.
+The currently proposed window convention requires whole calendar windows. Weeks start Monday and months start on day one. Audited calendar coverage recognizes a holiday/weekend at the period start; an initial partial trading session cannot qualify as a full leading window. Partial leading/trailing periods are excluded. Legitimate earlier observations only warm up indicators and event state. Signal age counts observed valid bars; missing bars are not fabricated. Final baseline/selected accounts currently start separately at original capital; that state convention is explicitly pending canonical synchronization.
 
 SMA-seeded EMA and Wilder ADX are explicit implementation conventions. Equity is marked at observed Opens/Closes and scheduled events. Bar-end volume cannot determine an earlier Open fill. Open quotes remain execution proxies, with zero modeled spread/slippage and no guarantee of actual market liquidity.
 
@@ -62,4 +62,4 @@ python3 -m trendtrade101 export-dashboard --output .private/export/TrendTrade101
 
 The HTML export is self-contained, includes a capture timestamp and works without the Python server. It is a snapshot, not a continuously connected cloud dashboard. The CI workflow publishes this file as its `research-dashboard` artifact after tests pass. Raw vendor data is never included.
 
-Gross, after-fee and after-tax views reconcile costs on the same actual trade path. They are not independent reinvestment simulations. Trade counts mean complete aggregate position closures. Current residual positions, missing fills and sparse samples remain visible.
+Gross, after-fee and after-tax views reconcile costs on the same actual trade path. They are not independent reinvestment simulations. Trade counts mean complete aggregate position closures. Current residual positions, missing fills and sparse samples remain visible. A positive histogram hump whose preceding nonpositive boundary is unavailable is flagged without inventing its earlier peak. See [the v0.13 implementation audit and decision memo](technical-conventions-v013.md) for the exact remaining proposals and evidence requirements.

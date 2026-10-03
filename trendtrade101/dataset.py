@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from math import isfinite
-from .engine import Bar
+from .engine import Bar,OpenQuote
 from .inputs import EXPECTED,project_members
 from .storage import sha256
 from .timing import Session
@@ -29,6 +29,7 @@ class Dataset:
     bars: list[Bar]
     sessions: list[Session]
     source_path: Path
+    open_quotes: list[OpenQuote] | None = None
 
     @property
     def kind(self): return self.manifest["kind"]
@@ -60,6 +61,10 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
     if not manifest.get("calendar_complete_through"):
         raise ValueError("Full calendar coverage must be recorded")
     if kind=="yahoo_audited":
+        if not manifest.get("calendar_complete_from") or not manifest.get("study_start"):
+            raise ValueError("Real packages require explicit calendar coverage and study-start boundaries")
+        if not datetime.fromisoformat(manifest["study_start"]).tzinfo:
+            raise ValueError("Study-start boundary must include a timezone")
         receipt=manifest.get("audit",{})
         if any(receipt.get(k,{}).get("status")!="verified" or not receipt[k].get("evidence")
                for k in REQUIRED_AUDITS):
@@ -91,6 +96,15 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
         bars.append(Bar(**record))
     if any(b.ticker not in symbols for b in bars):
         raise ValueError("Data contains a security outside frozen membership")
+    if kind=="yahoo_audited" and not manifest.get("opens_file"):
+        raise ValueError("Real packages require independent executable Open observations")
+    if manifest.get("opens_file"):
+        quote_path=(path.parent/manifest["opens_file"]).resolve()
+        if not quote_path.is_relative_to(path.parent.resolve()) or sha256(quote_path)!=manifest["opens_sha256"]:
+            raise ValueError("Executable Open path/hash mismatch")
+        quotes=[OpenQuote(q["ticker"],datetime.fromisoformat(q["start"]),q["open"]) for q in json.loads(quote_path.read_text())]
+    else:
+        quotes=[OpenQuote(b.ticker,b.start,b.open) for b in bars]
     sessions=[Session(s["market"],datetime.fromisoformat(s["start"]),datetime.fromisoformat(s["end"]),
                       tuple((datetime.fromisoformat(a),datetime.fromisoformat(b)) for a,b in s.get("breaks",[])))
               for s in manifest["sessions"]]
@@ -100,7 +114,21 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
     if len(lookup)!=len(sessions):
         raise ValueError("Duplicate calendar session")
     expected={a:b for s in sessions for a,b in s.expected_bars()}
+    starts=set(expected) if manifest["frequency"]=="5m" else {s.start for s in sessions}
+    quote_keys=set()
+    quote_prices={}
+    for quote in quotes:
+        key=(quote.ticker,quote.start)
+        if quote.ticker not in symbols or quote.start not in starts or key in quote_keys:
+            raise ValueError("Executable Open is duplicated or outside frozen symbols/calendar")
+        first_trade=manifest["members"][quote.ticker].get("first_trade_date")
+        if first_trade and quote.start.astimezone(ZoneInfo(manifest["timezone"])).date()<date.fromisoformat(first_trade):
+            raise ValueError("Executable Open predates audited issuer listing")
+        quote_keys.add(key)
+        quote_prices[key]=quote.open
     for bar in bars:
+        if quote_prices.get((bar.ticker,bar.start))!=bar.open:
+            raise ValueError("Completed bar Open differs from independently recorded execution quote")
         first_trade=manifest["members"][bar.ticker].get("first_trade_date")
         if first_trade and bar.start.astimezone(ZoneInfo(manifest["timezone"])).date()<date.fromisoformat(first_trade):
             raise ValueError("Bar predates the audited issuer listing; ticker reuse is not continuity")
@@ -110,6 +138,8 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
         elif (bar.start,bar.end) not in lookup:
             raise ValueError("Daily bar does not match its session")
     for ticker,meta in manifest["members"].items():
+        if meta.get("lot_history") or meta.get("lot_schedule"):
+            raise ValueError("Time-varying legal lots require a dated execution model")
         if not isinstance(meta["lot"],int) or meta["lot"]<=0:
             raise ValueError("Invalid legal lot")
         if meta["availability"] not in ("available","not_yet_listed","unavailable","halted"):
@@ -125,4 +155,4 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
             raise ValueError("Naive or duplicate split event")
         action_keys.add((action["ticker"],at))
     digest=fingerprint({"manifest":manifest,"bars_sha256":manifest["bars_sha256"],"sources":sources})
-    return Dataset(manifest,digest,bars,sessions,path)
+    return Dataset(manifest,digest,bars,sessions,path,quotes)

@@ -36,6 +36,7 @@ class Order:
     reservation: float
     reason: str
     status: str = "queued"
+    cap_reservation: float = 0
 
 class Ledger:
     def __init__(self, *, capital: float, position_cap: float, fee_rate: float,
@@ -61,6 +62,10 @@ class Ledger:
         return sum(o.reservation for o in self.orders if o.status == "queued")
 
     @property
+    def reserved_notional(self):
+        return sum(o.cap_reservation for o in self.orders if o.status == "queued")
+
+    @property
     def exposure(self):
         return sum(p.quantity*self.marks[t] for t,p in self.positions.items() if p.quantity)
 
@@ -76,17 +81,24 @@ class Ledger:
     def apply_split(self, ticker: str, ratio: float, at: datetime):
         if not isfinite(ratio) or ratio <= 0:
             raise ValueError("Invalid split ratio")
-        quantities = []
         position = self.positions.get(ticker)
+        held=position.quantity*ratio if position else 0
+        if abs(held-round(held))>1e-8:
+            raise ValueError("Fractional split entitlements require an audited cash-in-lieu model")
+        if round(held)%self.lots[ticker]:
+            raise ValueError("Split-created odd-lot holdings require an audited execution model")
         if position:
-            quantities.append((position,position.quantity*ratio))
+            position.quantity=int(round(held))
         for order in self.orders:
             if order.ticker==ticker and order.side=="buy" and order.status=="queued":
-                quantities.append((order,order.quantity*ratio))
-        if any(abs(q-round(q))>1e-8 for _,q in quantities):
-            raise ValueError("Fractional split entitlements require an audited cash-in-lieu model")
-        for obj,q in quantities:
-            obj.quantity=int(round(q))
+                before=order.quantity
+                order.quantity=floor((before*ratio+1e-9)/self.lots[ticker])*self.lots[ticker]
+                if not order.quantity:
+                    order.status="below_lot"
+                    order.reservation=order.cap_reservation=0
+                self._log(order,"split_resized" if order.quantity else "below_lot",at,
+                          queued_quantity_before_split=before,queued_quantity_after_split=order.quantity,
+                          split_ratio=ratio)
         if ticker in self.marks:
             self.marks[ticker]/=ratio
         self.events.append({"status":"split","ticker":ticker,"ratio":ratio,"time":at.isoformat()})
@@ -104,6 +116,12 @@ class Ledger:
             units -= 1
         return units*lot
 
+    def _cash_notional(self,budget):
+        """Invert the capped fee without treating fees as held market value."""
+        budget=max(0,budget)
+        uncapped=budget/(1+self.fee_rate)
+        return uncapped if uncapped*self.fee_rate<=self.fee_cap else max(0,budget-self.fee_cap)
+
     def queue_buy(self, *, event_id, ticker, signal_time, due_time, slope, adx,
                   target, signal_price):
         if event_id in self.ids:
@@ -113,20 +131,25 @@ class Ledger:
         self.ids.add(event_id)
         lot = self.lots[ticker]
         self.mark(ticker, signal_price)
-        # Capital checks include every outstanding reservation.
-        cap_room = max(0, self.cap-self.exposure-self.reserved)
+        # Queued notional constrains capacity; fee-inclusive reservations constrain cash.
+        cap_room = max(0, self.cap-self.exposure-self.reserved_notional)
         available = max(0, self.cash-self.reserved)
-        budget = min(max(0,target)+self.fee(max(0,target)), cap_room, available)
-        qty = min(max(0,floor(target/(signal_price*lot)))*lot,
+        notional=min(max(0,target),cap_room,self._cash_notional(available))
+        budget=min(available,notional+self.fee(notional))
+        qty = min(max(0,floor((notional+1e-9)/(signal_price*lot)))*lot,
                   self._affordable(budget,signal_price,lot))
         reserve = budget if qty else 0
         order = Order(event_id,ticker,"buy",signal_time,due_time,slope,adx,target,qty,reserve,"entry")
+        order.cap_reservation=notional if qty else 0
         if target <= 0:
             order.status = "nonpositive_target"
         elif not qty:
-            order.status = "cash_shortfall" if available < lot*signal_price else "below_lot"
+            order.status = ("below_lot" if target < lot*signal_price else
+                            "cash_shortfall" if available < lot*signal_price+self.fee(lot*signal_price) else
+                            "position_cap_shortfall")
         self.orders.append(order)
-        self._log(order,order.status,signal_time,reservation=reserve,signal_adx=adx,signal_slope=slope)
+        self._log(order,order.status,signal_time,reservation=reserve,cap_reservation=order.cap_reservation,
+                  signal_adx=adx,signal_slope=slope)
         return order
 
     def queue_exit(self, *, event_id, ticker, signal_time, due_time, reason):
@@ -199,16 +222,19 @@ class Ledger:
                     self._log(order,"canceled",at,cancellation_reason="same_time_aggregate_exit")
                     continue
                 other_reserved = self.reserved-order.reservation
-                budget = min(order.reservation,self.cash-other_reserved,
-                             max(0,self.cap-self.exposure-other_reserved))
+                budget = min(order.reservation,self.cash-other_reserved)
+                cap_room=max(0,self.cap-self.exposure)
                 quantity = self._affordable(max(0,budget),price,self.lots[order.ticker])
-                quantity = min(quantity, max(0,floor(order.target/(price*self.lots[order.ticker])))*self.lots[order.ticker])
+                quantity = min(quantity, max(0,floor(min(order.target,cap_room)/(price*self.lots[order.ticker])))*self.lots[order.ticker])
                 if self.policy.shrink_only:
                     quantity = min(quantity,order.quantity)
                 if not quantity:
-                    order.status = "below_lot"
+                    unit=price*self.lots[order.ticker]
+                    order.status = ("below_lot" if order.target < unit else
+                                    "cash_shortfall" if budget < unit+self.fee(unit) else
+                                    "position_cap_shortfall")
                     order.reservation = 0
-                    self._log(order,"below_lot",at)
+                    self._log(order,order.status,at,unexecuted_quantity=order.quantity)
                     continue
                 fee = self.fee(quantity*price)
                 cost = quantity*price+fee

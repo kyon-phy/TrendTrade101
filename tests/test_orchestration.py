@@ -15,6 +15,15 @@ from trendtrade101.portfolio import Ledger,LedgerPolicy
 from trendtrade101.engine import Bar,replay
 
 class OrchestrationTests(unittest.TestCase):
+    def test_time_varying_lot_metadata_cannot_be_silently_ignored(self):
+        with tempfile.TemporaryDirectory() as d:
+            ds=build_fixture(Path(d))
+            manifest=json.loads(ds.source_path.read_text())
+            manifest["members"]["NVDA"]["lot_history"]=[{"from":"2026-01-01","lot":1}]
+            ds.source_path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError,"Time-varying"):
+                load_dataset(ROOT,ds.source_path,allow_synthetic=True)
+
     def test_public_derivatives_are_verified_without_claiming_original_bytes(self):
         r=verify_project_inputs(ROOT)
         self.assertEqual(r["status"],"verified")

@@ -40,6 +40,7 @@ def summarize(curve,initial_equity,fees,taxes,trades,events):
             "orders_unfilled_at_segment_end":len(event_ids({"unfilled_at_end"})),
             "below_lot_orders":len(event_ids({"below_lot"})),
             "cash_shortfall_orders":len(event_ids({"cash_shortfall"})),
+            "position_cap_shortfall_orders":len(event_ids({"position_cap_shortfall"})),
             "canceled_orders":len(event_ids({"canceled"})),
             "unsuccessful_scheduled_liquidations":len(failures),
             "exit_reason_counts":dict(Counter(t["exit_reason"] for t in trades))}

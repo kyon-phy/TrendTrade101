@@ -10,7 +10,7 @@ from .dataset import Dataset,fingerprint,load_dataset
 from .engine import replay
 from .inputs import project_members,symbols_for
 from .portfolio import Ledger,LedgerPolicy
-from .research import Interval,candidates,folds,guard_training,holdout_from_complete_sessions,select_candidate
+from .research import Interval,candidates,folds,first_full_period,guard_training,holdout_from_complete_sessions,select_candidate
 from .schedule import liquidation_schedule
 from .reporting import summarize
 from .signals import SignalRules
@@ -30,8 +30,13 @@ def freeze_plan(root: Path, dataset: Dataset, universe: str, run_dir: Path) -> d
     period_ends={date.fromisoformat(x) for x in dataset.manifest["complete_period_ends"]}
     holdout=holdout_from_complete_sessions(complete,frequency=dataset.frequency,
         as_of=date.fromisoformat(dataset.manifest["as_of_date"]),audited_period_ends=period_ends)
-    first=min(b.start.astimezone(ZoneInfo(dataset.manifest["timezone"])).date()
-              for b in dataset.bars)
+    first_observation=min(b.start for b in dataset.bars)
+    scope_start=datetime.fromisoformat(dataset.manifest.get("study_start",first_observation.isoformat()))
+    if dataset.kind=="yahoo_audited" and dataset.frequency=="5m" and scope_start>first_observation:
+        raise ValueError("Minute study start cannot discard earlier accessible audited history")
+    first=first_full_period(max(scope_start,first_observation),dataset.sessions,frequency=dataset.frequency,
+        timezone=dataset.manifest["timezone"],calendar_complete_from=date.fromisoformat(
+            dataset.manifest.get("calendar_complete_from",min(s.start.date() for s in dataset.sessions).isoformat())))
     windows=list(folds(first,holdout,frequency=dataset.frequency))
     if not windows: raise ValueError("Insufficient pre-holdout history for a full training/test fold")
     plan={"schema_version":1,"created_at":utcnow(),"dataset_digest":dataset.digest,
@@ -39,6 +44,7 @@ def freeze_plan(root: Path, dataset: Dataset, universe: str, run_dir: Path) -> d
           "implementation_digest":implementation_digest(),
           "configuration_version":config["source_version"],"market":dataset.market,
           "frequency":dataset.frequency,"timezone":dataset.manifest["timezone"],
+          "study_start":scope_start.isoformat(),
           "universe":universe,"members":members,"allocation":"fixed",
           "baseline":{k:config["indicators"][k] for k in ("adx_threshold","cross_window","hist_drawdown")},
           "delay_minutes":config["execution"]["delay_minutes"],
@@ -50,6 +56,7 @@ def freeze_plan(root: Path, dataset: Dataset, universe: str, run_dir: Path) -> d
           "valuation_cadence":"Every observed bar Open and Close and scheduled event; missing observations retain last observable marks.",
           "partial_window_policy":"Require full calendar training and test windows; exclude partial leading/trailing periods.",
           "initial_position_policy":"Flat at each training start; retain cash and residual positions across ordinary OOS folds.",
+          "final_position_policy":"Separate baseline/selected accounts start flat at original capital; prior bars warm up state only. Pending canonical synchronization.",
           "sparse_trade_threshold":5,"minimum_trade_count_filter":None,
           "biases":config["biases"],"final_holdout_reuse":False}
     current=read_json(run_dir/"plan.json")
@@ -94,6 +101,7 @@ def _segment(config,dataset,plan,arm,parameters,interval,ledger=None,allow_entri
         increments=config["indicators"]["hist_increments"],delay_minutes=plan["delay_minutes"],scaled_base=None,planned_exits=events,
         dataset_kind="synthetic" if dataset.kind=="synthetic_fixture" else "yahoo_audited",
         audit_digest=dataset.digest,allow_entries=allow_entries,
+        open_quotes=[q for q in dataset.open_quotes if q.ticker in plan["members"]],market=dataset.market,
         splits=[a for a in dataset.manifest.get("splits",[]) if a["ticker"] in plan["members"]],**parameters)
     result.update(configuration_version=plan["configuration_version"],dataset_digest=dataset.digest,
                   market=plan["market"],universe=plan["universe"],biases=plan["biases"])

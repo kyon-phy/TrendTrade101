@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from itertools import product
 from statistics import median
+from zoneinfo import ZoneInfo
 from .signals import ARMS, ADX_ARMS
 
 @dataclass(frozen=True)
@@ -54,6 +55,20 @@ def folds(available_start: date, holdout: Interval, *, frequency: str):
             test = month_shift(test,1)
     else:
         raise ValueError("Unsupported frequency")
+
+def first_full_period(available_at, sessions, *, frequency, timezone, calendar_complete_from):
+    """Recognize holiday starts while excluding a leading partial trading session."""
+    day=available_at.astimezone(ZoneInfo(timezone)).date()
+    if frequency=="5m":
+        boundary=day-timedelta(days=day.weekday());following=boundary+timedelta(days=7)
+    elif frequency=="daily":
+        boundary=day.replace(day=1);following=month_shift(boundary,1)
+    else:
+        raise ValueError("Unsupported frequency")
+    starts=[s.start for s in sessions if boundary<=s.start.astimezone(ZoneInfo(timezone)).date()<following]
+    if calendar_complete_from<=boundary and starts and available_at<=min(starts):
+        return boundary
+    return following
 
 def guard_training(interval: Interval, holdout: Interval):
     if interval.overlaps(holdout) or interval.end > holdout.start:

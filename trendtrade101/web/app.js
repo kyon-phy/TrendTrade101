@@ -52,7 +52,7 @@ function renderResults(){
     if(m.sparse)row.append(node('p','Sparse sample: fewer than five complete aggregate closures.','badge blocked'));
     const diagnostics=node('details'),diagnosticValues=node('dl');
     diagnostics.append(node('summary','Execution diagnostics'));
-    for(const [label,key] of [['Orders with missing prices','orders_with_missing_price'],['Unfilled at segment ends','orders_unfilled_at_segment_end'],['Below-lot orders','below_lot_orders'],['Cash-shortfall orders','cash_shortfall_orders'],['Canceled orders','canceled_orders'],['Unsuccessful scheduled liquidations','unsuccessful_scheduled_liquidations']]){
+    for(const [label,key] of [['Orders with missing prices','orders_with_missing_price'],['Unfilled at segment ends','orders_unfilled_at_segment_end'],['Below-lot orders','below_lot_orders'],['Cash-shortfall orders','cash_shortfall_orders'],['Position-cap shortfalls','position_cap_shortfall_orders'],['Canceled orders','canceled_orders'],['Unsuccessful scheduled liquidations','unsuccessful_scheduled_liquidations'],['Bars with incomplete hump history','positive_hump_without_known_boundary_bars']]){
       if(m[key]!==undefined)diagnosticValues.append(node('dt',label),node('dd',String(m[key])));
     }
     diagnostics.append(diagnosticValues);row.append(diagnostics);

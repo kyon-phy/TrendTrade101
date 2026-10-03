@@ -47,3 +47,5 @@ Private source identities, credentials, conversations, third-party report bodies
 Frozen historical US baskets are user-fixed estimated subsets, not certified whole-market Top30. Applying later minute membership information to earlier July observations introduces selection look-ahead bias. Current-membership survivorship, excluded dividends, zero spread/slippage, conditional JP fees and simplified taxes remain explicit limitations.
 
 See [architecture](docs/architecture.md), [execution definitions](docs/execution-definitions.md), [data and runs](docs/data-and-runs.md), [network access](docs/network-access.md) and [current blockers](docs/status.md).
+
+The [v0.13 implementation audit](docs/technical-conventions-v013.md) distinguishes approved strategy choices, narrow technical proposals, optional JP ADX sizing and data evidence still required before historical execution.

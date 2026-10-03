@@ -109,6 +109,7 @@
     "signal_gap_policy",
     "valuation_cadence",
     "fold_account_state",
+    "final_account_state",
     "partial_window_policy",
     "split_lot_basis",
     "corporate_distributions",

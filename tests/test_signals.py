@@ -10,6 +10,13 @@ def state(arm="FULL"):
     return SignalState(arm,rules=RULES,adx_threshold=25,cross_window=5,hist_drawdown=.4,increments=3)
 
 class SignalTests(unittest.TestCase):
+    def test_initial_positive_hump_is_flagged_until_a_boundary_is_observed(self):
+        s=state()
+        self.assertTrue(s.update(reading(9,10,10))["inadequate_hump_history"])
+        self.assertTrue(s.update(reading(9,6,6))["inadequate_hump_history"])
+        self.assertFalse(s.update(reading(9,0,0))["inadequate_hump_history"])
+        self.assertFalse(s.update(reading(9,1,1))["inadequate_hump_history"])
+
     def test_ma_only_has_no_histogram_or_adx_entry_gate(self):
         s=state("MA_ONLY")
         s.update(reading(9,-2,-2,0))

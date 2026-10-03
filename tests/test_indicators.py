@@ -2,6 +2,15 @@ import unittest
 from trendtrade101.indicators import Indicators, Smoother, bullish_cross, positive_histogram
 
 class IndicatorTests(unittest.TestCase):
+    def test_macd_signal_startup_uses_nine_available_macd_values(self):
+        state=Indicators(seed_method="sma_seed")
+        result=[state.update(101+i,99+i,100+i) for i in range(40)]
+        self.assertTrue(all(r.macd is None for r in result[:25]))
+        self.assertIsNotNone(result[25].macd)
+        self.assertTrue(all(r.histogram is None for r in result[:33]))
+        self.assertAlmostEqual(result[33].signal,sum(r.macd for r in result[25:34])/9)
+        self.assertAlmostEqual(result[33].histogram,result[33].macd-result[33].signal)
+
     def test_ema_seed_and_recursive_reference(self):
         ema = Smoother(3,0.5)
         self.assertEqual([ema.update(x) for x in [1,2,3,8,4]],[None,None,2,5,4.5])

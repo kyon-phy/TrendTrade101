@@ -13,6 +13,60 @@ def sell(a,event="exit",ticker="AAA",at=T+timedelta(hours=1)):
     return a.queue_exit(event_id=event,ticker=ticker,signal_time=at,due_time=at,reason="test")
 
 class PortfolioTests(unittest.TestCase):
+    def test_pending_split_rounds_order_quantity_without_inventing_an_entitlement(self):
+        a=account();order=buy(a,target=1000)
+        a.apply_split("AAA",.25,T+timedelta(minutes=5))
+        self.assertEqual(order.quantity,2)
+        self.assertEqual(order.status,"queued")
+        a.execute(T+timedelta(minutes=20),{"AAA":400},tax_year=2026)
+        self.assertEqual(a.positions["AAA"].quantity,2)
+
+    def test_split_created_odd_lot_holding_is_not_sold_as_a_regular_lot(self):
+        from trendtrade101.portfolio import Position
+        a=account(capital=16000000,lot=100)
+        a.positions["AAA"]=Position(100,10000,10000,T);a.mark("AAA",100)
+        with self.assertRaisesRegex(ValueError,"odd-lot"):
+            a.apply_split("AAA",.5,T)
+        self.assertEqual(a.positions["AAA"].quantity,100)
+        self.assertEqual(a.marks["AAA"],100)
+
+    def test_fees_do_not_consume_position_market_value_capacity(self):
+        a=account(capital=1200);a.cap=1000
+        order=buy(a,target=1000)
+        self.assertEqual(order.quantity,10)
+        self.assertEqual(order.cap_reservation,1000)
+        self.assertAlmostEqual(order.reservation,1004.95)
+        a.execute(T+timedelta(minutes=20),{"AAA":100},tax_year=2026)
+        self.assertEqual(a.exposure,1000)
+        self.assertAlmostEqual(a.cash,195.05)
+
+    def test_pending_notional_does_not_double_count_reserved_fees(self):
+        a=account(capital=1200);a.cap=1000
+        first=buy(a,target=500)
+        second=buy(a,event="b",ticker="BBB",target=500)
+        self.assertEqual((first.quantity,second.quantity),(5,5))
+        self.assertEqual(a.reserved_notional,1000)
+        a.execute(T+timedelta(minutes=20),{"AAA":100,"BBB":100},tax_year=2026)
+        self.assertEqual(a.exposure,1000)
+        self.assertGreaterEqual(a.cash,0)
+
+    def test_cash_shortfall_includes_the_fee_and_is_not_reported_as_below_lot(self):
+        a=account(capital=100)
+        self.assertEqual(buy(a,target=100).status,"cash_shortfall")
+
+    def test_fill_priority_is_not_reversed_by_other_pending_capacity(self):
+        a=account(capital=2000);a.cap=1400
+        from trendtrade101.portfolio import Position
+        a.positions["HELD"]=Position(4,400,400,T);a.mark("HELD",100);a.cash-=400
+        first=buy(a,target=500,slope=2)
+        second=buy(a,event="b",ticker="BBB",target=500,slope=1)
+        # A previously held position appreciates before these orders execute.
+        a.mark("HELD",300)
+        a.execute(T+timedelta(minutes=20),{"AAA":100,"BBB":100},tax_year=2026)
+        self.assertEqual(a.positions["AAA"].quantity,2)
+        self.assertEqual(second.status,"position_cap_shortfall")
+        self.assertEqual(a.exposure,1400)
+
     def test_flat_scheduled_exit_cancels_buys_without_a_lingering_sell(self):
         a=account();pending=buy(a)
         order=sell(a,at=T+timedelta(minutes=1))

@@ -1,8 +1,24 @@
 import unittest
-from datetime import date
-from trendtrade101.research import Interval,folds,guard_training,candidates,select_candidate,maximum_drawdown,holdout_from_complete_sessions
+from datetime import date,datetime,timezone
+from trendtrade101.timing import Session
+from trendtrade101.research import Interval,folds,first_full_period,guard_training,candidates,select_candidate,maximum_drawdown,holdout_from_complete_sessions
 
 class ResearchTests(unittest.TestCase):
+    def test_holiday_week_and_weekend_month_start_are_full_calendar_windows(self):
+        t=datetime(2026,9,8,9,30,tzinfo=timezone.utc)
+        s=Session("US",t,t.replace(hour=16))
+        self.assertEqual(first_full_period(t,[s],frequency="5m",timezone="UTC",
+            calendar_complete_from=date(2026,9,7)),date(2026,9,7))
+        t=datetime(2026,8,3,9,30,tzinfo=timezone.utc);s=Session("US",t,t.replace(hour=16))
+        self.assertEqual(first_full_period(t,[s],frequency="daily",timezone="UTC",
+            calendar_complete_from=date(2026,8,1)),date(2026,8,1))
+
+    def test_partial_first_monday_session_cannot_start_a_full_training_week(self):
+        t=datetime(2026,9,7,9,30,tzinfo=timezone.utc)
+        s=Session("US",t,t.replace(hour=16))
+        self.assertEqual(first_full_period(t.replace(hour=10),[s],frequency="5m",timezone="UTC",
+            calendar_complete_from=date(2026,9,7)),date(2026,9,14))
+
     def test_no_redundant_grid_axes(self):
         self.assertEqual([len(candidates(a)) for a in ["MA_ONLY","MACD_HIST","MA_ADX","MACD_HIST_ADX","FULL"]],[3,3,9,9,27])
 

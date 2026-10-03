@@ -46,13 +46,24 @@ class PlannedExit:
     reason: str
     prohibit_buys_until: datetime
 
+@dataclass(frozen=True)
+class OpenQuote:
+    ticker: str
+    start: datetime
+    open: float
+
+    def __post_init__(self):
+        if not self.start.tzinfo or not isfinite(self.open) or self.open<=0:
+            raise ValueError("An Open needs an aware timestamp and positive finite price")
+
 def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
            frequency: str, market_timezone: str, arm: str, allocation: str,
            signal_rules: SignalRules, seed_method: str, adx_threshold: float,
            cross_window: int, hist_drawdown: float, increments: int,
            delay_minutes: int, scaled_base: float | None, planned_exits: list[PlannedExit],
            dataset_kind: str, audit_digest: str | None = None,
-           allow_entries: bool = True, splits: list[dict] | None = None) -> dict:
+           allow_entries: bool = True, splits: list[dict] | None = None,
+           open_quotes: list[OpenQuote] | None = None, market: str | None = None) -> dict:
     if dataset_kind not in ("synthetic","yahoo_audited"):
         raise ValueError("Unrecognized or unaudited dataset kind")
     if dataset_kind=="yahoo_audited" and not re.fullmatch(r"[0-9a-f]{64}",audit_digest or ""):
@@ -71,14 +82,22 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
         if b.start < prior_end.get(b.ticker,b.start):
             raise ValueError("Duplicate or overlapping bars")
         prior_end[b.ticker] = b.end
+        if open_quotes is None and b.start<end:
+            opened[b.start].append(OpenQuote(b.ticker,b.start,b.open))
         if b.end > end:
             continue
-        opened[b.start].append(b)
         closed[b.end].append(b)
         if b.ticker not in indicators:
             indicators[b.ticker] = Indicators(seed_method=seed_method)
             signals[b.ticker] = SignalState(arm,rules=signal_rules,adx_threshold=adx_threshold,
                 cross_window=cross_window,hist_drawdown=hist_drawdown,increments=increments)
+    if open_quotes is not None:
+        quote_ids=set()
+        for quote in open_quotes:
+            key=(quote.ticker,quote.start)
+            if key in quote_ids:raise ValueError("Duplicate executable Open")
+            quote_ids.add(key)
+            if quote.start<end:opened[quote.start].append(quote)
     for e in planned_exits:
         if e.due_time < e.signal_time:
             raise ValueError("Noncausal planned liquidation")
@@ -86,6 +105,7 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
     times = sorted(set(opened)|set(closed)|set(planned)|set(actions))
     blocked_until = {}
     curve = [account_point(ledger,start)]
+    inadequate_hump_bars=undefined_histogram_bars=0
     for at in times:
         if at > end:
             break
@@ -97,6 +117,8 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
             if start <= at <= end:
                 ledger.mark(b.ticker,b.close)
                 decisions.append((b,signal))
+                inadequate_hump_bars+=bool(signal["inadequate_hump_history"])
+                undefined_histogram_bars+=reading.histogram is None
         for action in actions[at]:
             ticker,ratio=action["ticker"],action["ratio"]
             if ticker in indicators:
@@ -124,7 +146,10 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
                     continue
                 target = target_notional(ledger.initial_capital,allocation,adx=s["adx"],
                     adx_threshold=adx_threshold,arm=arm,base=scaled_base)
-                ledger.queue_buy(event_id=f"{arm}:{b.ticker}:{at.isoformat()}:{s['cross_identity']}",
+                # Cross identities are stable indices in the immutable ticker history.
+                # Signal time is logged separately, so a fold parameter change cannot
+                # resubmit the same cross pair at another evaluation timestamp.
+                ledger.queue_buy(event_id=f"entry:{market or market_timezone}:{frequency}:{arm}:{b.ticker}:{s['cross_identity']}",
                     ticker=b.ticker,signal_time=at,
                     due_time=at+timedelta(minutes=delay_minutes) if frequency=="5m" else at+timedelta(microseconds=1),
                     slope=s["slope_pct"] or 0,adx=s["adx"],target=target,signal_price=b.close)
@@ -141,8 +166,12 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
     events=ledger.events[initial_events:]
     metrics=summarize(curve,initial_equity,fees,taxes,trades,events)
     metrics["zero_volume_observations"]=sum(b.volume==0 for b in bars if start<=b.end<end)
+    metrics["positive_hump_without_known_boundary_bars"]=inadequate_hump_bars
+    metrics["undefined_histogram_bars"]=undefined_histogram_bars
     return {"status":"synthetic_test_only" if dataset_kind=="synthetic" else "completed","dataset_kind":dataset_kind,
         "scope":{"start":start.isoformat(),"end":end.isoformat(),"arm":arm,"allocation":allocation,
+                 "market":market or market_timezone,
+                 "fill_model":"Observed five-minute Open after fixed delay" if frequency=="5m" else "Daily next-session-Open simplified fills",
                  "frequency":frequency,"delay_minutes":delay_minutes if frequency=="5m" else None},
         "metrics":metrics,"equity":curve,"orders":events,"trades":trades,
         "residual_positions":{t:p.quantity for t,p in ledger.positions.items() if p.quantity},

@@ -29,6 +29,7 @@ class SignalState:
         self.sma_cross = self.macd_cross = None
         self.seen = set()
         self.peak = None
+        self.hump_boundary_seen = False
 
     def apply_split(self, ratio: float):
         if ratio <= 0:
@@ -72,6 +73,7 @@ class SignalState:
                 exit_signal = hit and (declining or not self.rules.require_histogram_decline)
             if h <= 0:
                 self.peak = None
+                self.hump_boundary_seen = True
         adx_ok = reading.adx is not None and reading.adx > self.adx_threshold
         identity = None
         if self.arm in ("MA_ONLY", "MA_ADX"):
@@ -93,6 +95,7 @@ class SignalState:
             self.seen.add(identity)
         self.previous = reading
         return {"entry":bool(entry), "exit":bool(exit_signal), "cross_identity":identity,
+                "inadequate_hump_history":h is not None and h>0 and not self.hump_boundary_seen,
                 "histogram_peak":self.peak, "slope_pct":reading.slope_pct, "adx":reading.adx}
 
 def target_notional(initial_capital: float, allocation: str, *, adx: float | None,
