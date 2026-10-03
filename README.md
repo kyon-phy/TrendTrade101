@@ -2,6 +2,8 @@
 
 Auditable US and Japan trend-strategy research with a read-only progress console.
 
+For continued work, start with [PROJECT_STATE.md](PROJECT_STATE.md), [AGENTS.md](AGENTS.md) and the [repository-local continuity skill](.agents/skills/maintain-project-context/SKILL.md). The state file is a short evidence index; recover actual Git/CI/data status before relying on it.
+
 **Current state:** the authorized public input derivatives are verified: 201 memberships, 127 unique securities and the approved PYPL substitution. Canonical configuration v0.13 has been read in full. Baseline, walk-forward and one-time holdout orchestration pass deterministic synthetic tests. Yahoo access is blocked by the cloud environment's network policy, and actual data audits remain unfinished. No historical baseline, optimization or final-holdout returns have been calculated.
 
 ## Open the console

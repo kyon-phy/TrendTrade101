@@ -1,4 +1,6 @@
-# Implementation checkpoint
+# Historical implementation checkpoint
+
+Snapshot for commit `8d8dc82c29aa3d8fef18d3e8090335b6dc8f178a`. Start current recovery at [PROJECT_STATE.md](../PROJECT_STATE.md); this historical narrative is not an automatically current status or a competing authority.
 
 ## Complete
 

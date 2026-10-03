@@ -10,10 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: python scripts/check.py
+      - run: python scripts/project_context.py lint
       - run: python -m trendtrade101 verify-inputs
       - run: python -m trendtrade101 export-dashboard --output dist/TrendTrade101_Dashboard.html
       - uses: actions/upload-artifact@v4
