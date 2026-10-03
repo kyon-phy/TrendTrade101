@@ -159,3 +159,21 @@ This incremental log begins with checked repository evidence and the current nar
   "supersedes": "D006"
 }
 ```
+
+## D009
+
+```json
+{
+  "id": "D009",
+  "recorded_at": "2026-10-03T17:07:38+00:00",
+  "domain": "data",
+  "status": "blocked",
+  "summary": "Parent-observed preflights in a fresh environment after the user republished settings reached HTTP 429 at 15:59:42Z and again at 17:02:10Z on 2026-10-03. The second request was the one explicitly authorized delayed retry. Both returned Edge: Too Many Requests, server envoy, with no Retry-After. The exact limiting layer is unknown. No data, JP request or historical run resulted, and no further retry is authorized. This supersedes D004 as the current network blocker; the earlier executor CONNECT 403 remains historical evidence.",
+  "observation_scope": "parent_observed_preflight",
+  "evidence": [
+    "docs/network-access.md"
+  ],
+  "pending_fields": [],
+  "supersedes": "D004"
+}
+```

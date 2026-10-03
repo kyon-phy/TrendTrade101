@@ -5,7 +5,7 @@ This is a concise evidence index, not the strategy authority or a claim that the
 ```json
 {
   "schema_version": 1,
-  "recorded_at": "2026-10-03T16:06:46.028397+00:00",
+  "recorded_at": "2026-10-03T17:07:38+00:00",
   "verified_checkpoint": {
     "commit": "ee743bb43c53c33784572a114a30bafe221e8e04",
     "tests_passed": 93,
@@ -34,8 +34,11 @@ This is a concise evidence index, not the strategy authority or a claim that the
   "results": [],
   "blockers": [
     {
-      "id": "network_allowlist",
+      "id": "yahoo_http_429",
       "status": "blocked",
+      "observation_scope": "parent_observed_preflight",
+      "latest_observed_at": "2026-10-03T17:02:10Z",
+      "further_retry_authorized": false,
       "evidence": "docs/network-access.md"
     },
     {
@@ -55,7 +58,7 @@ This is a concise evidence index, not the strategy authority or a claim that the
   ],
   "next_actions": [
     "Resolve pending technical conventions through the canonical configuration owner; preserve proposed status until then.",
-    "Keep Yahoo access paused until normal environment allowlist authorization is resolved; never bypass the denial.",
+    "Keep Yahoo requests paused: the parent observed HTTP 429 in a fresh environment after the hostname was allowed, including the one authorized delayed retry. No further retry is authorized; the exact limiting layer remains unknown. See D009 and the network evidence receipt.",
     "After authorized connectivity and actual data audits, freeze data/configuration/code and holdout dates; run baseline before optimization.",
     "At each material milestone, reconcile this index with actual Git, CI, artifacts and run evidence."
   ]
