@@ -121,3 +121,41 @@ This incremental log begins with checked repository evidence and the current nar
   "supersedes": null
 }
 ```
+
+## D007
+
+```json
+{
+  "id": "D007",
+  "recorded_at": "2026-10-03T16:06:46.028397+00:00",
+  "domain": "workflow",
+  "status": "implemented",
+  "summary": "Repository-local continuity skill, concise state index, append-only decision records, read-only recovery and CI record checks implemented in ee743bb43c53c33784572a114a30bafe221e8e04. No personal registry installation or strategy change.",
+  "evidence": [
+    ".agents/skills/maintain-project-context/SKILL.md",
+    "scripts/project_context.py",
+    "tests/test_project_context.py"
+  ],
+  "pending_fields": [],
+  "supersedes": null
+}
+```
+
+## D008
+
+```json
+{
+  "id": "D008",
+  "recorded_at": "2026-10-03T16:06:46.028397+00:00",
+  "domain": "software",
+  "status": "verified",
+  "summary": "Commit ee743bb43c53c33784572a114a30bafe221e8e04 passed 93 local software tests; exact-head CI succeeded and its dashboard artifact was observed. A fresh read-only recovery matched remote HEAD and supplied CI/artifact observations. Historical research remains unexecuted.",
+  "verification_scope": "synthetic_software",
+  "evidence": [
+    "https://github.com/kyon-phy/TrendTrade101/actions/runs/37135521443",
+    "tests/test_project_context.py"
+  ],
+  "pending_fields": [],
+  "supersedes": "D006"
+}
+```

@@ -142,6 +142,7 @@ def lint(root):
 def recover(root,observations=None,remote=False,now=None):
     errors=lint(root);warnings=[]
     output={'errors':errors,'warnings':warnings,'historical_success_certified':False,
+            'recovery_checks_complete':False,
             'remote_status':'unverified','ci_artifact_status':'unverified',
             'limitation':'Supplied observations are not authenticated by this offline checker.'}
     if errors:return output

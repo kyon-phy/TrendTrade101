@@ -5,14 +5,14 @@ This is a concise evidence index, not the strategy authority or a claim that the
 ```json
 {
   "schema_version": 1,
-  "recorded_at": "2026-10-03T15:57:45.844039+00:00",
+  "recorded_at": "2026-10-03T16:06:46.028397+00:00",
   "verified_checkpoint": {
-    "commit": "8d8dc82c29aa3d8fef18d3e8090335b6dc8f178a",
-    "tests_passed": 82,
+    "commit": "ee743bb43c53c33784572a114a30bafe221e8e04",
+    "tests_passed": 93,
     "test_scope": "synthetic_software",
-    "ci_url": "https://github.com/kyon-phy/TrendTrade101/actions/runs/37132449542",
+    "ci_url": "https://github.com/kyon-phy/TrendTrade101/actions/runs/37135521443",
     "artifact_name": "research-dashboard",
-    "artifact_sha256": "2bca2b8a46c8e23d499aeaf29a565dc35e0f28952cb2a4b293e871d45dcd86da"
+    "artifact_sha256": "2559267efa8b2171da71019ced7bb126f8c7fb5e02128a2959d6c8066024ffa3"
   },
   "configuration": {
     "version": "v0.13",
@@ -67,6 +67,6 @@ This is a concise evidence index, not the strategy authority or a claim that the
 - [Repository-local continuity skill](.agents/skills/maintain-project-context/SKILL.md) and [decision log](docs/decisions.md).
 - [Approved-rule public projection](config/inputs/TrendTrade101_Backtest_Configuration.md) and [original/public provenance](config/inputs/public_input_provenance.json).
 - [Pending technical bundle and JP alternative](docs/technical-conventions-v013.md), [network blocker](docs/network-access.md), and [data/run contract](docs/data-and-runs.md).
-- [Checkpoint CI and downloadable dashboard](https://github.com/kyon-phy/TrendTrade101/actions/runs/37132449542). HTML is a timestamped snapshot; no public live URL is verified. Local port availability must be checked after environment restarts.
+- [Checkpoint CI and downloadable dashboard](https://github.com/kyon-phy/TrendTrade101/actions/runs/37135521443). HTML is a timestamped snapshot; no public live URL is verified. Local port availability must be checked after environment restarts.
 
 No historical baseline, optimization or final-holdout result is claimed. The original input bytes were not verified here; the public derivatives were. No stock reselection is authorized.

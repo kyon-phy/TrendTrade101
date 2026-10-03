@@ -17,6 +17,15 @@ class ContextTests(unittest.TestCase):
         for name in ('AGENTS.md','PROJECT_STATE.md','README.md'):
             shutil.copyfile(ROOT/name,self.root/name)
         self.state,self.decisions=context.read_records(self.root)
+        # Copy newly linked public evidence too; a future checkpoint may cite
+        # another tracked source/test file without changing the fixture layout.
+        for decision in self.decisions:
+            for value in decision['evidence']:
+                source=context.local_path(ROOT,value)
+                if source is not None:
+                    target=self.root/source.relative_to(ROOT)
+                    target.parent.mkdir(parents=True,exist_ok=True)
+                    shutil.copyfile(source,target)
         self.head=self.state['verified_checkpoint']['commit']
 
     def tearDown(self):self.tmp.cleanup()
