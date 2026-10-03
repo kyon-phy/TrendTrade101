@@ -1,0 +1,128 @@
+"""Load immutable, private local datasets and validate audit receipts.
+
+This module performs no network requests. An audit receipt is evidence of
+completed review, not a switch that invents provider coverage.
+"""
+from __future__ import annotations
+from dataclasses import dataclass
+from datetime import date,datetime
+from hashlib import sha256 as hash_bytes
+import json
+from pathlib import Path
+from zoneinfo import ZoneInfo
+from math import isfinite
+from .engine import Bar
+from .inputs import EXPECTED,project_members
+from .storage import sha256
+from .timing import Session
+
+REQUIRED_AUDITS=("calendar","timestamps","coverage","maximum_history","identity_and_ipo",
+                 "price_adjustments","corporate_actions","historical_lots","missing_data")
+
+def fingerprint(value) -> str:
+    return hash_bytes(json.dumps(value,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
+
+@dataclass
+class Dataset:
+    manifest: dict
+    digest: str
+    bars: list[Bar]
+    sessions: list[Session]
+    source_path: Path
+
+    @property
+    def kind(self): return self.manifest["kind"]
+    @property
+    def frequency(self): return self.manifest["frequency"]
+    @property
+    def market(self): return self.manifest["market"]
+
+def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
+    manifest=json.loads(path.read_text())
+    kind=manifest.get("kind")
+    if kind=="synthetic_fixture":
+        if not allow_synthetic:
+            raise ValueError("Synthetic data requires the explicit synthetic fixture route")
+    elif kind!="yahoo_audited":
+        raise ValueError("Dataset must be synthetic_fixture or yahoo_audited")
+    if manifest["configuration_source_sha256"] != EXPECTED["TrendTrade101_Backtest_Configuration.md"]:
+        raise ValueError("Dataset audit targets a different canonical configuration")
+    if manifest["frequency"] not in ("daily","5m") or manifest["market"] not in ("US","JP"):
+        raise ValueError("Invalid market/frequency")
+    rows=project_members(root)
+    selected={r["ticker"] for r in rows if r["market"]==manifest["market"]
+              and r["frequency"] in (manifest["frequency"],"daily_and_5m")}
+    symbols=set(manifest["members"])
+    if symbols != selected:
+        raise ValueError("Dataset must account for every frozen market/frequency member")
+    if manifest["price_basis"]!="historical_unadjusted_split_events":
+        raise ValueError("Unsupported price/quantity basis; do not silently use dividend-adjusted prices")
+    if not manifest.get("calendar_complete_through"):
+        raise ValueError("Full calendar coverage must be recorded")
+    if kind=="yahoo_audited":
+        receipt=manifest.get("audit",{})
+        if any(receipt.get(k,{}).get("status")!="verified" or not receipt[k].get("evidence")
+               for k in REQUIRED_AUDITS):
+            raise ValueError("Incomplete data audit receipt")
+        if manifest.get("unresolved_corporate_actions"):
+            raise ValueError("Unresolved corporate distribution or action")
+        if manifest.get("provider")!="Yahoo" or not manifest.get("source_snapshots"):
+            raise ValueError("Missing Yahoo snapshot provenance")
+        available={t for t,m in manifest["members"].items() if m["availability"]=="available"}
+        captured={s.get("ticker") for s in manifest["source_snapshots"] if s.get("ticker")}
+        if available!=captured:
+            raise ValueError("Snapshot inventory differs from available frozen members")
+        if any(not m.get("first_trade_date") for m in manifest["members"].values()):
+            raise ValueError("Audited issuer first-trade dates are required")
+    sources=[]
+    for source in manifest.get("source_snapshots",[]):
+        target=(path.parent/source["file"]).resolve()
+        if not target.is_relative_to(path.parent.resolve()) or sha256(target)!=source["sha256"]:
+            raise ValueError("Source snapshot path/hash mismatch")
+        sources.append(source["sha256"])
+    payload_path=(path.parent/manifest["bars_file"]).resolve()
+    if not payload_path.is_relative_to(path.parent.resolve()) or sha256(payload_path)!=manifest["bars_sha256"]:
+        raise ValueError("Dataset bars hash mismatch")
+    bars=[]
+    for row in json.loads(payload_path.read_text()):
+        record=dict(row)
+        for field in ("start","end","entry_cutoff"):
+            record[field]=datetime.fromisoformat(record[field]) if record.get(field) else None
+        bars.append(Bar(**record))
+    if any(b.ticker not in symbols for b in bars):
+        raise ValueError("Data contains a security outside frozen membership")
+    sessions=[Session(s["market"],datetime.fromisoformat(s["start"]),datetime.fromisoformat(s["end"]),
+                      tuple((datetime.fromisoformat(a),datetime.fromisoformat(b)) for a,b in s.get("breaks",[])))
+              for s in manifest["sessions"]]
+    if not sessions or not bars:
+        raise ValueError("Dataset contains no audited sessions/bars")
+    lookup={(s.start,s.end):s for s in sessions}
+    if len(lookup)!=len(sessions):
+        raise ValueError("Duplicate calendar session")
+    expected={a:b for s in sessions for a,b in s.expected_bars()}
+    for bar in bars:
+        first_trade=manifest["members"][bar.ticker].get("first_trade_date")
+        if first_trade and bar.start.astimezone(ZoneInfo(manifest["timezone"])).date()<date.fromisoformat(first_trade):
+            raise ValueError("Bar predates the audited issuer listing; ticker reuse is not continuity")
+        if manifest["frequency"]=="5m":
+            if expected.get(bar.start)!=bar.end:
+                raise ValueError("Intraday bar is outside the audited continuous-session grid")
+        elif (bar.start,bar.end) not in lookup:
+            raise ValueError("Daily bar does not match its session")
+    for ticker,meta in manifest["members"].items():
+        if not isinstance(meta["lot"],int) or meta["lot"]<=0:
+            raise ValueError("Invalid legal lot")
+        if meta["availability"] not in ("available","not_yet_listed","unavailable","halted"):
+            raise ValueError("Unknown availability status")
+        if not any(b.ticker==ticker for b in bars) and not meta.get("reason"):
+            raise ValueError("Missing member must retain an explicit reason")
+    action_keys=set()
+    for action in manifest.get("splits",[]):
+        if action["ticker"] not in symbols or not isfinite(action["ratio"]) or action["ratio"]<=0:
+            raise ValueError("Invalid split record")
+        at=datetime.fromisoformat(action["at"])
+        if not at.tzinfo or (action["ticker"],at) in action_keys:
+            raise ValueError("Naive or duplicate split event")
+        action_keys.add((action["ticker"],at))
+    digest=fingerprint({"manifest":manifest,"bars_sha256":manifest["bars_sha256"],"sources":sources})
+    return Dataset(manifest,digest,bars,sessions,path)

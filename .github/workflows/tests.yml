@@ -13,4 +13,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m unittest discover -s tests -v
+      - run: python scripts/check.py
+      - run: python -m trendtrade101 verify-inputs
+      - run: python -m trendtrade101 export-dashboard --output dist/TrendTrade101_Dashboard.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-dashboard
+          path: dist/TrendTrade101_Dashboard.html
+          retention-days: 30

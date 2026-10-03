@@ -106,6 +106,10 @@
   },
   "pending": [
     "indicator_initialization",
+    "signal_gap_policy",
+    "valuation_cadence",
+    "fold_account_state",
+    "partial_window_policy",
     "split_lot_basis",
     "corporate_distributions",
     "calendar_and_holdout_dates",

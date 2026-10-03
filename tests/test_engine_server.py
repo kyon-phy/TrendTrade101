@@ -4,6 +4,7 @@ import threading
 import unittest
 import urllib.error
 import urllib.request
+from dataclasses import replace
 from datetime import datetime,timedelta,timezone
 from pathlib import Path
 from trendtrade101.engine import Bar,replay
@@ -57,6 +58,12 @@ class IntegrationTests(unittest.TestCase):
             bar=next(b for b in bars if b.start.isoformat()==f["time"])
             self.assertEqual(f["price"],bar.open)
         self.assertEqual(result["status"],"synthetic_test_only")
+        args["ledger"]=Ledger(capital=100000,position_cap=100000,fee_rate=.00495,fee_cap=22,tax_rate=.20315,
+                      lots={"AAA":1},policy=LedgerPolicy("market_value",True,"realization_accrual",False))
+        zero_volume=replay([replace(b,volume=0) for b in bars],**args)
+        self.assertEqual(result["metrics"]["after_tax_return"],zero_volume["metrics"]["after_tax_return"])
+        self.assertEqual(result["orders"],zero_volume["orders"])
+        self.assertGreater(zero_volume["metrics"]["zero_volume_observations"],0)
         args["dataset_kind"]="real"
         with self.assertRaises(ValueError):replay(bars,**args)
 

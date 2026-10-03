@@ -9,11 +9,12 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from math import isfinite
+import re
 from zoneinfo import ZoneInfo
 from .indicators import Indicators
 from .portfolio import Ledger
 from .signals import SignalState, SignalRules, target_notional
-from .research import maximum_drawdown
+from .reporting import account_point,summarize
 
 @dataclass(frozen=True)
 class Bar:
@@ -50,13 +51,21 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
            signal_rules: SignalRules, seed_method: str, adx_threshold: float,
            cross_window: int, hist_drawdown: float, increments: int,
            delay_minutes: int, scaled_base: float | None, planned_exits: list[PlannedExit],
-           dataset_kind: str) -> dict:
-    if dataset_kind != "synthetic":
-        raise ValueError("Real-data replay is locked until exact input verification and audit are complete")
+           dataset_kind: str, audit_digest: str | None = None,
+           allow_entries: bool = True, splits: list[dict] | None = None) -> dict:
+    if dataset_kind not in ("synthetic","yahoo_audited"):
+        raise ValueError("Unrecognized or unaudited dataset kind")
+    if dataset_kind=="yahoo_audited" and not re.fullmatch(r"[0-9a-f]{64}",audit_digest or ""):
+        raise ValueError("Real replay requires a verified dataset audit digest")
     if frequency not in ("5m","daily") or end <= start:
         raise ValueError("Invalid replay interval/frequency")
     indicators, signals = {}, {}
+    initial_equity,initial_fees,initial_taxes = ledger.equity,ledger.fees,ledger.taxes
+    initial_events,initial_trades = len(ledger.events),len(ledger.trades)
     opened, closed, planned = defaultdict(list), defaultdict(list), defaultdict(list)
+    actions = defaultdict(list)
+    for action in splits or []:
+        actions[datetime.fromisoformat(action["at"])].append(action)
     prior_end = {}
     for b in sorted(bars,key=lambda b:(b.start,b.ticker)):
         if b.start < prior_end.get(b.ticker,b.start):
@@ -74,9 +83,9 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
         if e.due_time < e.signal_time:
             raise ValueError("Noncausal planned liquidation")
         planned[e.signal_time].append(e)
-    times = sorted(set(opened)|set(closed)|set(planned))
+    times = sorted(set(opened)|set(closed)|set(planned)|set(actions))
     blocked_until = {}
-    curve = []
+    curve = [account_point(ledger,start)]
     for at in times:
         if at > end:
             break
@@ -88,6 +97,13 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
             if start <= at <= end:
                 ledger.mark(b.ticker,b.close)
                 decisions.append((b,signal))
+        for action in actions[at]:
+            ticker,ratio=action["ticker"],action["ratio"]
+            if ticker in indicators:
+                indicators[ticker].apply_split(ratio)
+                signals[ticker].apply_split(ratio)
+            if start <= at < end:
+                ledger.apply_split(ticker,ratio,at)
         if start <= at < end:
             # Scheduled exits have priority over any same-instant entries.
             for e in planned[at]:
@@ -102,7 +118,7 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
                         reason="histogram_drawdown")
                     blocked_until[b.ticker] = max(blocked_until.get(b.ticker,at),at)
             for b,s in sorted(decisions,key=lambda p:(-(p[1]["slope_pct"] or 0),p[0].ticker)):
-                if not s["entry"] or blocked_until.get(b.ticker,datetime.min.replace(tzinfo=at.tzinfo)) >= at:
+                if not allow_entries or not s["entry"] or blocked_until.get(b.ticker,datetime.min.replace(tzinfo=at.tzinfo)) >= at:
                     continue
                 if frequency=="5m" and (b.entry_cutoff is None or at > b.entry_cutoff):
                     continue
@@ -112,28 +128,24 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
                     ticker=b.ticker,signal_time=at,
                     due_time=at+timedelta(minutes=delay_minutes) if frequency=="5m" else at+timedelta(microseconds=1),
                     slope=s["slope_pct"] or 0,adx=s["adx"],target=target,signal_price=b.close)
-            ledger.execute(at,{b.ticker:b.open for b in opened[at] if b.volume>0},
+            ledger.execute(at,{b.ticker:b.open for b in opened[at]},
                            tax_year=at.astimezone(ZoneInfo(market_timezone)).year)
-            curve.append({"time":at.isoformat(),"equity":ledger.equity,"cash":ledger.cash,
-                          "exposure":ledger.exposure,"reserved":ledger.reserved,
-                          "fees":ledger.fees,"taxes":ledger.taxes})
+            curve.append(account_point(ledger,at))
         elif at == end:
-            curve.append({"time":at.isoformat(),"equity":ledger.equity,"cash":ledger.cash,
-                          "exposure":ledger.exposure,"reserved":ledger.reserved,
-                          "fees":ledger.fees,"taxes":ledger.taxes})
+            curve.append(account_point(ledger,at))
+    if curve[-1]["time"]!=end.isoformat():
+        curve.append(account_point(ledger,end))
     ledger.finish(end)
-    values = [ledger.initial_capital]+[p["equity"] for p in curve]
-    final = values[-1]
-    return {"status":"synthetic_test_only","dataset_kind":dataset_kind,
+    trades=ledger.trades[initial_trades:]
+    fees,taxes=ledger.fees-initial_fees,ledger.taxes-initial_taxes
+    events=ledger.events[initial_events:]
+    metrics=summarize(curve,initial_equity,fees,taxes,trades,events)
+    metrics["zero_volume_observations"]=sum(b.volume==0 for b in bars if start<=b.end<end)
+    return {"status":"synthetic_test_only" if dataset_kind=="synthetic" else "completed","dataset_kind":dataset_kind,
         "scope":{"start":start.isoformat(),"end":end.isoformat(),"arm":arm,"allocation":allocation,
                  "frequency":frequency,"delay_minutes":delay_minutes if frequency=="5m" else None},
-        "metrics":{"after_tax_return":final/ledger.initial_capital-1,
-                   "after_fee_return":(final+ledger.taxes)/ledger.initial_capital-1,
-                   "gross_return":(final+ledger.taxes+ledger.fees)/ledger.initial_capital-1,
-                   "max_drawdown":maximum_drawdown(values),"closed_trades":len(ledger.trades),
-                   "fees":ledger.fees,"taxes":ledger.taxes,
-                   "win_rate":sum(t["after_fee_pnl"]>0 for t in ledger.trades)/len(ledger.trades) if ledger.trades else None},
-        "equity":curve,"orders":ledger.events,"trades":ledger.trades,
+        "metrics":metrics,"equity":curve,"orders":events,"trades":trades,
         "residual_positions":{t:p.quantity for t,p in ledger.positions.items() if p.quantity},
-        "limitations":["Synthetic execution test; no historical strategy validation.",
+        "limitations":(["Synthetic execution test; no historical strategy validation."] if dataset_kind=="synthetic" else [])+[
+                       "Fill eligibility does not use eventual bar volume; Open quotes are execution proxies.",
                        "Gross/fee views reconcile costs on the same realized trade path; they are not separate reinvestment simulations."]}

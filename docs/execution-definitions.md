@@ -1,6 +1,6 @@
 # Execution definitions reconciled with canonical v0.13
 
-The designated configuration writer saved these accepted definitions in authoritative v0.13. That entire source (1,031 lines) was read and reconciled with the local machine configuration, explicit policy objects and synthetic tests. Its expected SHA256 is 707cf2472d97d535061395a439fbe81764e9fec53b303edb88419d90c5553bce. Exact source-byte validation and market-data audit remain prerequisites for historical execution.
+The designated configuration writer saved these accepted definitions in authoritative v0.13. That entire source was read and reconciled with the local machine configuration, explicit policy objects and synthetic tests. Its original SHA256 is 707cf2472d97d535061395a439fbe81764e9fec53b303edb88419d90c5553bce. The authorized public projection has a separately verified hash and provenance; this does not claim local verification of original Library bytes. Market-data audit and remaining implementation synchronization still precede historical execution.
 
 | Area | Accepted definition |
 |---|---|
@@ -23,4 +23,4 @@ A last observed bar discovered retrospectively is not an acceptable flattening t
 
 The accepted definitions do not resolve every data interpretation. Indicator seeding is available as an explicit SMA-seed technical convention but remains unsynchronized. JP ADX-scaled base, actual legal lots, split normalization, corporate distributions, exact complete holdout dates and coverage remain pending. Primary experiments retain fixed 1/15 sizing; a fully crossed weighted ten-arm experiment is not enabled.
 
-The replay implementation deliberately rejects real datasets. This guard must remain until exact input verification and audited orchestration are complete.
+Real orchestration requires a validated immutable Yahoo package and completed configuration/implementation verification. `execution_ready` remains false while actual audits and remaining conventions are unfinished. The synthetic test route is explicitly labeled and cannot create historical dashboard results.

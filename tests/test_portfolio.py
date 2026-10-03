@@ -13,6 +13,25 @@ def sell(a,event="exit",ticker="AAA",at=T+timedelta(hours=1)):
     return a.queue_exit(event_id=event,ticker=ticker,signal_time=at,due_time=at,reason="test")
 
 class PortfolioTests(unittest.TestCase):
+    def test_flat_scheduled_exit_cancels_buys_without_a_lingering_sell(self):
+        a=account();pending=buy(a)
+        order=sell(a,at=T+timedelta(minutes=1))
+        self.assertEqual(pending.status,"canceled")
+        self.assertEqual(order.status,"no_position")
+        buy(a,event="later",at=T+timedelta(hours=2))
+        a.execute(T+timedelta(hours=3),{"AAA":100},tax_year=2026)
+        self.assertEqual(a.positions["AAA"].quantity,10)
+
+    def test_filled_aggregate_exit_cancels_duplicate_future_exits(self):
+        a=account();buy(a)
+        a.execute(T+timedelta(minutes=20),{"AAA":100},tax_year=2026)
+        first=sell(a)
+        later=a.queue_exit(event_id="later-exit",ticker="AAA",signal_time=T+timedelta(hours=1),
+                           due_time=T+timedelta(hours=2),reason="scheduled")
+        a.execute(T+timedelta(hours=1),{"AAA":100},tax_year=2026)
+        self.assertEqual(first.status,"filled")
+        self.assertEqual(later.status,"canceled")
+
     def test_delay_and_fill_open(self):
         a=account();buy(a)
         a.execute(T+timedelta(minutes=19),{"AAA":110},tax_year=2026)

@@ -2,7 +2,7 @@
 
 Auditable US and Japan trend-strategy research with a read-only progress console.
 
-**Current state:** a tested research foundation, not a completed historical backtest. Canonical configuration v0.13 has been read in full and the local execution/scoring definitions reconciled. Exact input bytes remain unavailable in this executor, Yahoo access returned HTTP 403, and real-data execution remains locked. No baseline, optimization or final-holdout returns have been calculated.
+**Current state:** the authorized public input derivatives are verified: 201 memberships, 127 unique securities and the approved PYPL substitution. Canonical configuration v0.13 has been read in full. Baseline, walk-forward and one-time holdout orchestration pass deterministic synthetic tests. Yahoo access is blocked by the cloud environment's network policy, and actual data audits remain unfinished. No historical baseline, optimization or final-holdout returns have been calculated.
 
 ## Open the console
 
@@ -13,20 +13,22 @@ cd /workspace/TrendTrade101
 python3 -m trendtrade101 dashboard --host 127.0.0.1 --port 8765
 ```
 
-Open the saved cloud environment's port 8765 preview at `http://127.0.0.1:8765`. If its preview requires listening on all interfaces, explicitly launch with `--host 0.0.0.0` and keep the preview private. No deployment or public dashboard is configured.
+The live console listens at `http://127.0.0.1:8765` inside the saved cloud environment. A user-facing cloud port preview must be provided by that environment; this local address is not a public URL. No public live deployment is configured.
+
+For a server-free view, open the latest successful [Tests workflow run](https://github.com/kyon-phy/TrendTrade101/actions/workflows/tests.yml), download its `research-dashboard` artifact, unzip it and open `TrendTrade101_Dashboard.html`. This self-contained HTML is a timestamped snapshot; it works without installation or a server. CI exports only status and permitted summaries, and does not fetch prices or run historical research.
 
 The console refreshes actual prerequisite status every five seconds. It never displays synthetic test values as strategy results. Its HTTP server exposes only its own UI files and a status endpoint; private files and raw vendor data are not served.
 
 ## Verify the implementation
 
 ```bash
-python3 -m unittest discover -s tests -v
+python3 scripts/check.py
 python3 -m trendtrade101 status
 python3 -m trendtrade101 verify-inputs
-python3 -m trendtrade101 baseline
+python3 -m trendtrade101 export-dashboard --output .private/export/TrendTrade101_Dashboard.html
 ```
 
-The last two commands deliberately return exit code 2 while prerequisites are blocked. The baseline command is a readiness check in this revision; real-data orchestration is not enabled.
+Input verification succeeds for the published derivatives. Real research commands require an immutable, audited local dataset and a frozen plan; see the [ordered command sequence](docs/data-and-runs.md). Calling `baseline` without a dataset reports the current blockers and returns exit code 2. Synthetic tests do not unlock actual-data execution.
 
 ## Research scope
 
@@ -38,10 +40,10 @@ The last complete minute week and daily month remain sealed. Minute training/tes
 
 ## Inputs and privacy
 
-The four exact reviewed input files belong in `config/inputs/` when approved for public configuration. If that directory is absent, the loader uses `.private/inputs/` for supported private materialization. It does not silently fall back when a present public input directory fails validation. The validator checks supplied SHA256 values, 201 membership rows, 127 unique market/ticker pairs, ordered manifest groups and the single US daily NKE-to-PYPL substitution. It does not reconstruct a missing pool.
+`config/inputs/` contains the authorized sanitized public projection, its provenance and separately pinned hashes. Its `public_derived` verification explicitly reports `original_bytes_verified: false`. The distinct `original_source` route uses the original hashes and supported private materialization under `.private/inputs/`. A failed public validation never silently falls back. Both routes check 201 membership rows, 127 unique market/ticker pairs, ordered groups and the single US daily NKE-to-PYPL substitution. No missing pool is reconstructed, and the canonical Library configuration remains authoritative.
 
 Private source identities, credentials, conversations, third-party report bodies and vendor price caches must never be committed. `.private/`, `data/` and `runs/` are ignored. Data capture writes private content-addressed snapshots with retrieval metadata. A representative connectivity request failed with HTTP 403; no vendor price snapshot was obtained.
 
 Frozen historical US baskets are user-fixed estimated subsets, not certified whole-market Top30. Applying later minute membership information to earlier July observations introduces selection look-ahead bias. Current-membership survivorship, excluded dividends, zero spread/slippage, conditional JP fees and simplified taxes remain explicit limitations.
 
-See [architecture](docs/architecture.md), [execution definitions](docs/execution-definitions.md) and [current blockers](docs/status.md).
+See [architecture](docs/architecture.md), [execution definitions](docs/execution-definitions.md), [data and runs](docs/data-and-runs.md), [network access](docs/network-access.md) and [current blockers](docs/status.md).

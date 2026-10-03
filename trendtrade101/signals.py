@@ -1,7 +1,7 @@
 """Signal primitives with explicit experimental definitions, no production defaults."""
 from __future__ import annotations
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from .indicators import Reading, bullish_cross, positive_histogram
 
 ARMS = ("MA_ONLY", "MACD_HIST", "MA_ADX", "MACD_HIST_ADX", "FULL")
@@ -29,6 +29,18 @@ class SignalState:
         self.sma_cross = self.macd_cross = None
         self.seen = set()
         self.peak = None
+
+    def apply_split(self, ratio: float):
+        if ratio <= 0:
+            raise ValueError("Invalid split ratio")
+        self.hist = deque((h/ratio if h is not None else None for h in self.hist),maxlen=self.increments+1)
+        if self.peak is not None:
+            self.peak /= ratio
+        if self.previous is not None:
+            fields = ("sma_fast","sma_slow","macd","signal","histogram")
+            self.previous = replace(self.previous,**{
+                name:getattr(self.previous,name)/ratio if getattr(self.previous,name) is not None else None
+                for name in fields})
 
     def update(self, reading: Reading) -> dict:
         self.index += 1

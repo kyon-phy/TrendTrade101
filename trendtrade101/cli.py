@@ -2,7 +2,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from .inputs import verify, input_directory
+from .inputs import verify_project_inputs
 from .readiness import status, require_ready
 from .server import make_server
 from .storage import write_json
@@ -13,7 +13,17 @@ def main(argv=None):
     commands = parser.add_subparsers(dest="command",required=True)
     commands.add_parser("status")
     commands.add_parser("verify-inputs")
-    commands.add_parser("baseline",help="Check real-data baseline prerequisites")
+    for command in ("plan","baseline","optimize","freeze-final","holdout"):
+        run=commands.add_parser(command)
+        run.add_argument("--dataset",type=Path)
+        run.add_argument("--run-dir",type=Path,default=Path(".private/runs/current"))
+        run.add_argument("--universe",default="existing_25")
+        run.add_argument("--synthetic",action="store_true",help="Explicitly use synthetic fixtures, never historical results")
+    audit=commands.add_parser("audit-local")
+    audit.add_argument("--capture",required=True,type=Path)
+    audit.add_argument("--output",required=True,type=Path)
+    export=commands.add_parser("export-dashboard")
+    export.add_argument("--output",type=Path,required=True)
     dashboard = commands.add_parser("dashboard")
     dashboard.add_argument("--host",default="127.0.0.1")
     dashboard.add_argument("--port",type=int,default=8765)
@@ -29,16 +39,39 @@ def main(argv=None):
         finally:
             server.server_close()
         return 0
-    if args.command == "baseline":
+    if args.command == "export-dashboard":
+        from .dashboard import export_dashboard
+        print(json.dumps(export_dashboard(root,args.output)))
+        return 0
+    if args.command == "audit-local":
+        from .audit_package import audit_local_charts
         try:
-            require_ready(root)
-        except RuntimeError as exc:
+            print(json.dumps(audit_local_charts(root,args.capture,args.output)))
+            return 0
+        except (ValueError,KeyError,OSError) as exc:
             print(json.dumps({"status":"blocked","error":str(exc)}))
             return 2
-        # Removal of this guard requires the audited orchestration integration.
-        print(json.dumps({"status":"blocked","error":"Real-data orchestration is not enabled"}))
-        return 2
-    report = verify(input_directory(root)) if args.command=="verify-inputs" else status(root)
+    if args.command in ("plan","baseline","optimize","freeze-final","holdout"):
+        try:
+            if not args.dataset:
+                require_ready(root)
+                raise ValueError("Supply --dataset pointing to an audited local dataset.json")
+            from .dataset import load_dataset
+            from .orchestration import freeze_plan,run_baseline,run_walk_forward,freeze_final_selection,run_final_holdout
+            dataset=load_dataset(root,args.dataset,allow_synthetic=args.synthetic)
+            directory=args.run_dir if args.run_dir.is_absolute() else root/args.run_dir
+            if args.command=="plan": result=freeze_plan(root,dataset,args.universe,directory)
+            elif args.command=="baseline": result=run_baseline(root,dataset,directory)
+            elif args.command=="optimize": result=run_walk_forward(root,dataset,directory)
+            elif args.command=="freeze-final": result=freeze_final_selection(root,dataset,directory)
+            else: result=run_final_holdout(root,dataset,directory)
+            print(json.dumps({"status":"synthetic_test_only" if args.synthetic else "completed",
+                              "phase":args.command,"run_directory":str(directory),"result":result},allow_nan=False))
+            return 0
+        except (RuntimeError,ValueError,KeyError,OSError,TypeError) as exc:
+            print(json.dumps({"status":"blocked","error":str(exc)}))
+            return 2
+    report = verify_project_inputs(root) if args.command=="verify-inputs" else status(root)
     if args.command=="verify-inputs":
         write_json(root/".private/input_verification.json",report)
     print(json.dumps(report,indent=2,allow_nan=False))

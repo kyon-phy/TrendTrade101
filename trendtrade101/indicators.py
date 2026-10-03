@@ -63,6 +63,21 @@ class Indicators:
         self.previous = None
         self.previous_fast = None
 
+    def apply_split(self, ratio: float):
+        """Rescale past price state at the split's effective time."""
+        if ratio <= 0:
+            raise ValueError("Invalid split ratio")
+        for sma in (self.fast,self.slow):
+            sma.values = deque((v/ratio for v in sma.values),maxlen=sma.period)
+        for smoother in (self.ef,self.es,self.sig,self.tr,self.plus,self.minus):
+            smoother.seed = [v/ratio for v in smoother.seed]
+            if smoother.value is not None:
+                smoother.value /= ratio
+        if self.previous is not None:
+            self.previous = tuple(v/ratio for v in self.previous)
+        if self.previous_fast is not None:
+            self.previous_fast /= ratio
+
     def update(self, high: float, low: float, close: float) -> Reading:
         if not all(isfinite(x) and x > 0 for x in (high, low, close)) or not low <= close <= high:
             raise ValueError("Invalid OHLC input")

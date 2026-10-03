@@ -73,9 +73,29 @@ class Ledger:
             raise ValueError("Invalid mark")
         self.marks[ticker] = price
 
+    def apply_split(self, ticker: str, ratio: float, at: datetime):
+        if not isfinite(ratio) or ratio <= 0:
+            raise ValueError("Invalid split ratio")
+        quantities = []
+        position = self.positions.get(ticker)
+        if position:
+            quantities.append((position,position.quantity*ratio))
+        for order in self.orders:
+            if order.ticker==ticker and order.side=="buy" and order.status=="queued":
+                quantities.append((order,order.quantity*ratio))
+        if any(abs(q-round(q))>1e-8 for _,q in quantities):
+            raise ValueError("Fractional split entitlements require an audited cash-in-lieu model")
+        for obj,q in quantities:
+            obj.quantity=int(round(q))
+        if ticker in self.marks:
+            self.marks[ticker]/=ratio
+        self.events.append({"status":"split","ticker":ticker,"ratio":ratio,"time":at.isoformat()})
+
     def _log(self, order, status, at, **details):
         self.events.append({"event_id":order.event_id, "ticker":order.ticker,
                             "side":order.side, "status":status, "time":at.isoformat(),
+                            "signal_time":order.signal_time.isoformat(),
+                            "due_time":order.due_time.isoformat(),
                             "reason":order.reason, **details})
 
     def _affordable(self, budget, price, lot):
@@ -121,8 +141,10 @@ class Ledger:
                 self._log(o,"canceled",signal_time,cancellation_reason="aggregate_exit")
                 o.reservation = 0
         order = Order(event_id,ticker,"sell",signal_time,due_time,0,None,0,0,0,reason)
+        if not self.positions.get(ticker,Position()).quantity:
+            order.status = "no_position"
         self.orders.append(order)
-        self._log(order,"queued",signal_time)
+        self._log(order,order.status,signal_time)
         return order
 
     def execute(self, at: datetime, opens: dict[str,float], *, tax_year: int):
@@ -160,14 +182,16 @@ class Ledger:
                     "entry_time":position.first_fill.isoformat(), "exit_time":at.isoformat(),
                     "gross_pnl":proceeds-position.gross_cost, "after_fee_pnl":pnl,
                     "tax_delta":tax_delta, "after_tax_pnl":pnl-tax_delta,
+                    "after_fee_return":pnl/position.cost,
                     "holding_seconds":(at-position.first_fill).total_seconds(), "exit_reason":order.reason})
                 self.positions[order.ticker] = Position()
                 exited.add(order.ticker)
                 for pending in self.orders:
-                    if pending.ticker == order.ticker and pending.side == "buy" and pending.status == "queued":
+                    if pending is not order and pending.ticker == order.ticker and pending.status == "queued":
                         pending.status = "canceled"
                         pending.reservation = 0
-                        self._log(pending,"canceled",at,cancellation_reason="aggregate_exit_filled")
+                        self._log(pending,"canceled",at,cancellation_reason=
+                                  "aggregate_exit_filled" if pending.side=="buy" else "superseded_aggregate_exit")
             else:
                 if order.ticker in exited:
                     order.status = "canceled"
