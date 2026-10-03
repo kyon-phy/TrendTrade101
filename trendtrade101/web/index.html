@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TrendTrade101 · Research Console</title><link rel="stylesheet" href="/style.css"></head>
+<body><div class="shell"><aside><a class="brand" href="/">T<span>101</span></a>
+<div class="brand-name">TRENDTRADE101</div><div class="aside-label">RESEARCH WORKSPACE</div>
+<nav><a href="#overview" class="active">Overview</a><a href="#pipeline">Research pipeline</a><a href="#inputs">Frozen inputs</a>
+<a href="#configuration">Configuration</a><a href="#results">Results</a><a href="#limitations">Research notes</a></nav>
+<div class="aside-bottom"><span class="dot"></span> Read-only console<br><small>Separate US & Japan accounts<br>No live trading connection</small></div></aside>
+<main><header><div><div class="eyebrow">SYSTEMATIC RESEARCH / WORKSPACE</div><h1>Research overview</h1>
+<p>From frozen inputs to an untouched final test.</p></div><div class="status-group"><span id="connection" class="badge">Connecting</span><span id="version" class="version"></span></div></header>
+<section id="overview" class="overview">
+<article class="metric"><div>US INITIAL CAPITAL</div><strong>$100,000</strong><span>USD · independent account</span></article>
+<article class="metric"><div>JAPAN INITIAL CAPITAL</div><strong>¥16,000,000</strong><span>JPY · independent account</span></article>
+<article class="metric"><div>MEMBERSHIP RECORDS</div><strong id="membership">—</strong><span id="membership-note">Awaiting byte verification</span></article>
+<article class="metric"><div>FINAL HOLDOUT</div><strong class="teal">Sealed</strong><span>No returns inspected</span></article>
+</section><section class="panel" id="pipeline"><div class="section-head"><div><h2>Research pipeline</h2><p>Live prerequisites and execution state</p></div><span class="small" id="updated">Waiting for status</span></div>
+<div id="stages" class="stages"></div><div class="notice">A blocked prerequisite prevents dependent runs. Empty results mean the experiment has not run.</div></section>
+<section class="two-col"><article class="panel" id="inputs"><div class="section-head"><div><h2>Frozen inputs</h2><p>Memberships stay fixed across all experiments</p></div></div><div id="files"></div>
+<div class="notice">Approved exception: PYPL replaces NKE in the US daily historical basket only. No other reselection.</div></article>
+<article class="panel" id="configuration"><div class="section-head"><div><h2>Baseline configuration</h2><p>Approved strategy parameters</p></div></div><dl id="parameters"></dl>
+<details><summary>Definitions and synchronization</summary><ul id="pending"></ul><p>Accepted definitions must be synchronized to the canonical record before real-data execution.</p></details></article></section>
+<section class="panel" id="results"><div class="section-head"><div><h2>Experiment results</h2><p>Baseline → walk-forward → final holdout</p></div><div class="filters"><label>Market <select id="market"><option>US</option><option>JP</option></select></label><label>Frequency <select id="frequency"><option>5m</option><option>daily</option></select></label></div></div>
+<div id="results-content" class="empty"><div class="empty-icon">↗</div><h3>No backtest results yet</h3><p>Returns, drawdown and trade statistics appear here only after an audited run.<br>Synthetic test values are never displayed as investment results.</p></div></section>
+<section class="two-col"><article class="panel" id="limitations"><h2>Interpretation & limitations</h2><ul id="biases"></ul></article><article class="panel"><h2>Engineering verification</h2><div id="verification" class="verification">No verification record yet.</div><p class="small">Software tests establish behavior on synthetic fixtures. They do not establish historical performance.</p></article></section>
+<footer>TrendTrade101 · Reproducible research · Vendor snapshots remain private</footer></main></div><script src="/app.js"></script></body></html>

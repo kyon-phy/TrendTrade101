@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "source_version": "v0.12",
+  "source_sha256": "2b1760c4db0339908e9facf6a73223c7071fe41200aebf0fbcfe8f6732f75de9",
+  "execution_ready": false,
+  "markets": {
+    "US": {
+      "currency": "USD",
+      "capital": 100000,
+      "position_cap": 100000,
+      "base": 10000,
+      "lot": 1,
+      "fee_rate": 0.00495,
+      "fee_cap": 22
+    },
+    "JP": {
+      "currency": "JPY",
+      "capital": 16000000,
+      "position_cap": 16000000,
+      "base": null,
+      "lot": 100,
+      "fee_rate": 0,
+      "fee_cap": 0
+    }
+  },
+  "indicators": {
+    "sma_fast": 5,
+    "sma_slow": 20,
+    "macd_fast": 12,
+    "macd_slow": 26,
+    "macd_signal": 9,
+    "adx_period": 14,
+    "adx_threshold": 25,
+    "cross_window": 5,
+    "hist_increments": 3,
+    "hist_drawdown": 0.4
+  },
+  "execution": {
+    "delay_minutes": 20,
+    "entry_cutoff_minutes": 63,
+    "fixed_fraction": 0.06666666666666667,
+    "position_scale": 1,
+    "spread_bps": 0,
+    "slippage_bps": 0,
+    "annual_tax_rate": 0.20315,
+    "price_stop": {
+      "enabled": false,
+      "threshold": null
+    },
+    "price_target": {
+      "enabled": false,
+      "threshold": null
+    }
+  },
+  "research": {
+    "arms": [
+      "MA_ONLY",
+      "MACD_HIST",
+      "MA_ADX",
+      "MACD_HIST_ADX",
+      "FULL"
+    ],
+    "primary_allocation": "fixed",
+    "train_weeks": 2,
+    "test_weeks": 1,
+    "train_months": 6,
+    "test_months": 1,
+    "final_holdout_reuse": false,
+    "max_training_drawdown": 0.3,
+    "grid": {
+      "adx_threshold": [
+        20,
+        25,
+        30
+      ],
+      "cross_window": [
+        3,
+        5,
+        8
+      ],
+      "hist_drawdown": [
+        0.3,
+        0.4,
+        0.5
+      ]
+    }
+  },
+  "pending": [
+    "indicator_initialization",
+    "split_lot_basis",
+    "corporate_distributions",
+    "calendar_and_holdout_dates",
+    "jp_scaled_base"
+  ],
+  "biases": [
+    "Retrospective universe selection and survivorship bias.",
+    "Minute memberships use later July/August selection information on potentially earlier July prices.",
+    "US historical baskets are fixed estimated subsets, not certified full-market Top30.",
+    "Zero spread/slippage, excluded dividends/FX, conditional JP zero fees and simplified tax.",
+    "Vendor coverage, auctions, actions, IPO gaps and historical lot units require audit."
+  ],
+  "accepted_pending_canonical_sync": [
+    "cross_window_endpoints",
+    "event_identity",
+    "histogram_reset_order",
+    "reservation_and_price_change",
+    "cap_valuation_basis",
+    "priority_tie_break",
+    "scheduled_liquidation",
+    "tax_timing_and_carry",
+    "objective_and_neighborhood",
+    "sparse_trade_threshold"
+  ]
+}

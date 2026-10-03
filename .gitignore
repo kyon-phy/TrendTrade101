@@ -1,0 +1,17 @@
+.private/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.env
+.env.*
+data/
+runs/
+*.parquet
+*.arrow
+*.feather
+*.sqlite*
+*.log
