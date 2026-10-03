@@ -2,7 +2,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from .inputs import verify
+from .inputs import verify, input_directory
 from .readiness import status, require_ready
 from .server import make_server
 from .storage import write_json
@@ -38,7 +38,7 @@ def main(argv=None):
         # Removal of this guard requires the audited orchestration integration.
         print(json.dumps({"status":"blocked","error":"Real-data orchestration is not enabled"}))
         return 2
-    report = verify(root/".private/inputs") if args.command=="verify-inputs" else status(root)
+    report = verify(input_directory(root)) if args.command=="verify-inputs" else status(root)
     if args.command=="verify-inputs":
         write_json(root/".private/input_verification.json",report)
     print(json.dumps(report,indent=2,allow_nan=False))

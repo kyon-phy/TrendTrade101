@@ -18,6 +18,7 @@ function render(s){
   const values=[['Signal bars','5 minutes / daily'],['SMA / MACD','5, 20 / 12, 26, 9'],['ADX gate','Strictly greater than 25'],['Cross window','5 bars'],['Histogram drawdown','40% of running peak'],['Intraday delay','20 minutes · fixed per round'],['Primary allocation','1/15 of initial capital'],['Daily execution','Next-session Open']];
   $('parameters').replaceChildren(...values.flatMap(([k,v])=>[node('dt',k),node('dd',v)]));
   $('pending').replaceChildren(...s.pending.map(x=>node('li','Pending: '+x.replaceAll('_',' '))),
+    ...(s.accepted_definitions||[]).map(x=>node('li','Approved in '+s.version+': '+x.replaceAll('_',' '))),
     ...(s.accepted_pending_canonical_sync||[]).map(x=>node('li','Accepted; awaiting canonical sync: '+x.replaceAll('_',' '))));
   $('biases').replaceChildren(...s.biases.map(x=>node('li',x)));
   const v=s.verification;

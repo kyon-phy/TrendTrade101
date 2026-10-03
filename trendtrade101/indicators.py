@@ -1,7 +1,7 @@
 """Streaming causal indicators. Initialization is explicit, never inferred.
 
 SMA-seeded EMA and Wilder smoothing are available technical conventions.
-They remain pending choices for real-data runs under configuration v0.12.
+They remain pending choices for real-data runs under configuration v0.13.
 Missing/nonfinite bars are rejected; the caller must audit gaps.
 """
 from __future__ import annotations

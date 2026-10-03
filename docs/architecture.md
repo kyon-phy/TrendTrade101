@@ -47,9 +47,9 @@ All-time technical indicator state may be warmed up using legitimate prior bars,
 
 ## Remaining integration work
 
-1. Restore supported input materialization, verify exact bytes and retain private source metadata.
-2. Write approved definitions to a guarded new canonical version, then update the local configuration/hash expectations.
-3. Audit actual exchange calendars, Yahoo timestamp semantics, maximum accessible 5m coverage, IPO intervals and each security's identity/lot.
+1. Obtain the reviewed exact inputs in `config/inputs/` or through supported private materialization, verify bytes and retain private source metadata.
+2. Canonical v0.13 definitions and expected source hash are reconciled locally; verify the exact incoming source bytes before execution.
+3. Resolve the reported Yahoo HTTP 403 access blocker through the authorized workflow, then audit actual exchange calendars, Yahoo timestamp semantics, maximum accessible 5m coverage, IPO intervals and each security's identity/lot. Do not bypass the denial.
 4. Resolve price normalization, split-to-historical-lot conversion, and non-cash distributions without silently including dividends.
 5. Generate planned session/month liquidation events and freeze complete holdout dates from audited data.
 6. Connect the validated snapshots, approved policy and real-data orchestration; run the baseline first.

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "source_version": "v0.12",
-  "source_sha256": "2b1760c4db0339908e9facf6a73223c7071fe41200aebf0fbcfe8f6732f75de9",
+  "source_version": "v0.13",
+  "source_sha256": "707cf2472d97d535061395a439fbe81764e9fec53b303edb88419d90c5553bce",
   "execution_ready": false,
   "markets": {
     "US": {
@@ -50,7 +50,15 @@
     "price_target": {
       "enabled": false,
       "threshold": null
-    }
+    },
+    "reservation_basis": "signal_target_plus_estimated_fee",
+    "priority_tie_break": [
+      "ticker",
+      "event_id"
+    ],
+    "minute_flatten": "last_calendar_continuous_bar_open",
+    "daily_flatten": "last_trading_day_open",
+    "daily_month_end_buy_ban": true
   },
   "research": {
     "arms": [
@@ -83,7 +91,18 @@
         0.4,
         0.5
       ]
-    }
+    },
+    "objective": "after_tax_return",
+    "neighborhood": "axis_adjacent_median",
+    "sparse_trade_threshold": 5,
+    "minimum_trade_count_filter": null,
+    "week_start": "Monday",
+    "month_start": "first_calendar_day",
+    "parameter_tie_order": [
+      "adx_threshold",
+      "cross_window",
+      "hist_drawdown"
+    ]
   },
   "pending": [
     "indicator_initialization",
@@ -99,7 +118,8 @@
     "Zero spread/slippage, excluded dividends/FX, conditional JP zero fees and simplified tax.",
     "Vendor coverage, auctions, actions, IPO gaps and historical lot units require audit."
   ],
-  "accepted_pending_canonical_sync": [
+  "canonical_definitions_synchronized": true,
+  "accepted_definitions": [
     "cross_window_endpoints",
     "event_identity",
     "histogram_reset_order",
@@ -110,5 +130,18 @@
     "tax_timing_and_carry",
     "objective_and_neighborhood",
     "sparse_trade_threshold"
-  ]
+  ],
+  "signal_rules": {
+    "window_includes_current": true,
+    "deduplicate_cross_pair": true,
+    "evaluate_exit_before_zero_reset": true,
+    "require_histogram_decline": true,
+    "exit_includes_equality": true
+  },
+  "ledger_policy": {
+    "cap_basis": "market_value",
+    "shrink_only": true,
+    "tax_timing": "realization_accrual",
+    "cross_year_loss_carry": false
+  }
 }

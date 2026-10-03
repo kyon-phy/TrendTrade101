@@ -48,11 +48,13 @@ class SignalState:
         if h is not None:
             prior_peak = self.peak
             declining = previous is not None and previous.histogram is not None and h < previous.histogram
+            if h <= 0 and self.rules.evaluate_exit_before_zero_reset:
+                exit_signal = True
             if h > 0:
                 self.peak = max(prior_peak or h, h)
             reference = self.peak if h > 0 else (
                 prior_peak if self.rules.evaluate_exit_before_zero_reset else None)
-            if reference is not None:
+            if reference is not None and not exit_signal:
                 threshold = (1-self.drawdown)*reference
                 hit = h <= threshold if self.rules.exit_includes_equality else h < threshold
                 exit_signal = hit and (declining or not self.rules.require_histogram_decline)

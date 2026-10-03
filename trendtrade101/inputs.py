@@ -7,7 +7,7 @@ from pathlib import Path
 from .storage import sha256, utcnow
 
 EXPECTED = {
-    "TrendTrade101_Backtest_Configuration.md": "2b1760c4db0339908e9facf6a73223c7071fe41200aebf0fbcfe8f6732f75de9",
+    "TrendTrade101_Backtest_Configuration.md": "707cf2472d97d535061395a439fbe81764e9fec53b303edb88419d90c5553bce",
     "frozen_universe_members.csv": "6441e090ca88ad8dd5d557b3cdbcca3d71971bec0c0070a750f67ca069a8e2b0",
     "frozen_universe_manifest.json": "3ee4c294809fe90619fe9eb06dbb110b53c6526ae21c47396a86f9a54a304b07",
     "frozen_universe_manifest.md": "7c4cee332c1e5b5d04f7e938c40bf30661cceb996fb997551a700e000e220af7",
@@ -15,6 +15,11 @@ EXPECTED = {
 
 class InputError(ValueError):
     pass
+
+def input_directory(root: Path) -> Path:
+    """Prefer an explicit reviewed public input directory when present."""
+    public = root / "config" / "inputs"
+    return public if public.is_dir() else root / ".private" / "inputs"
 
 def verify(directory: Path) -> dict:
     checks, problems = [], []

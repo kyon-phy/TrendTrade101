@@ -52,7 +52,7 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
            delay_minutes: int, scaled_base: float | None, planned_exits: list[PlannedExit],
            dataset_kind: str) -> dict:
     if dataset_kind != "synthetic":
-        raise ValueError("Real-data replay is locked until canonical synchronization and audit are complete")
+        raise ValueError("Real-data replay is locked until exact input verification and audit are complete")
     if frequency not in ("5m","daily") or end <= start:
         raise ValueError("Invalid replay interval/frequency")
     indicators, signals = {}, {}

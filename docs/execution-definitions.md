@@ -1,13 +1,13 @@
-# Accepted definitions awaiting canonical synchronization
+# Execution definitions reconciled with canonical v0.13
 
-These definitions were accepted during implementation. They are represented by explicit policy objects and synthetic tests. They do not become effective for historical research until saved to the authoritative configuration under its existing identity and version guard. The supplied source remains v0.12.
+The designated configuration writer saved these accepted definitions in authoritative v0.13. That entire source (1,031 lines) was read and reconciled with the local machine configuration, explicit policy objects and synthetic tests. Its expected SHA256 is 707cf2472d97d535061395a439fbe81764e9fec53b303edb88419d90c5553bce. Exact source-byte validation and market-data audit remain prerequisites for historical execution.
 
 | Area | Accepted definition |
 |---|---|
 | Cross window | Current bar plus previous N-1 bars: [t-N+1, t] |
 | Independent FULL event | One order for each distinct most-recent SMA/MACD cross pair |
-| Histogram exit | During decline, include equality at 60% of running peak; evaluate zero/negative before resetting the hump |
-| Reservation | Signal-price target quantity plus buy fee; fill-time quantity can shrink but cannot increase |
+| Histogram exit | H <= 0 independently triggers exit before resetting the hump; otherwise require decline and include equality at 60% of running peak |
+| Reservation | Signal-price target amount plus estimated buy fee, including the lot-rounding remainder; fill-time quantity can shrink but cannot increase |
 | Position caps | Then-known market value; fees and reservations also constrain cash |
 | Priority tie | Stable ticker, then event ID, following stored signal-time SMA slope |
 | Minute flatten | Last calendar-scheduled continuous-session bar Open; queue 20 minutes earlier |
@@ -23,4 +23,4 @@ A last observed bar discovered retrospectively is not an acceptable flattening t
 
 The accepted definitions do not resolve every data interpretation. Indicator seeding is available as an explicit SMA-seed technical convention but remains unsynchronized. JP ADX-scaled base, actual legal lots, split normalization, corporate distributions, exact complete holdout dates and coverage remain pending. Primary experiments retain fixed 1/15 sizing; a fully crossed weighted ten-arm experiment is not enabled.
 
-The replay implementation deliberately rejects real datasets. This guard must remain until the canonical update and audited orchestration are complete.
+The replay implementation deliberately rejects real datasets. This guard must remain until exact input verification and audited orchestration are complete.

@@ -46,6 +46,13 @@ class SignalTests(unittest.TestCase):
         s.update(reading(9,10,10))
         self.assertTrue(s.update(reading(9,6,6))["exit"])
 
+    def test_nonpositive_exit_does_not_require_a_previous_positive_peak(self):
+        s=state("MA_ONLY")
+        self.assertTrue(s.update(reading(9,-2,-2))["exit"])
+        self.assertTrue(s.update(reading(9,-1,-1))["exit"])
+        self.assertTrue(s.update(reading(9,0,0))["exit"])
+        self.assertTrue(s.update(reading(9,0,0))["exit"])
+
     def test_fixed_sizing_independent_of_adx(self):
         args=dict(initial_capital=100000,allocation="fixed",adx_threshold=25,arm="MA_ONLY",base=None)
         self.assertEqual(target_notional(adx=0,**args),target_notional(adx=100,**args))

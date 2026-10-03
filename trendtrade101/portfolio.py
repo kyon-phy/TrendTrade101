@@ -99,7 +99,7 @@ class Ledger:
         budget = min(max(0,target)+self.fee(max(0,target)), cap_room, available)
         qty = min(max(0,floor(target/(signal_price*lot)))*lot,
                   self._affordable(budget,signal_price,lot))
-        reserve = qty*signal_price + self.fee(qty*signal_price)
+        reserve = budget if qty else 0
         order = Order(event_id,ticker,"buy",signal_time,due_time,slope,adx,target,qty,reserve,"entry")
         if target <= 0:
             order.status = "nonpositive_target"
@@ -198,7 +198,9 @@ class Ledger:
             order.status = "filled"
             order.reservation = 0
             self._log(order,"filled",at,quantity=quantity,price=price,fee=fee,
-                      signal_time=order.signal_time.isoformat(),due_time=order.due_time.isoformat())
+                      signal_time=order.signal_time.isoformat(),due_time=order.due_time.isoformat(),
+                      queued_quantity=order.quantity if order.side == "buy" else quantity,
+                      unexecuted_quantity=order.quantity-quantity if order.side == "buy" else 0)
         if self.cash < -1e-7 or self.reserved > self.cash+1e-7:
             raise AssertionError("Cash/reservation invariant violated")
 

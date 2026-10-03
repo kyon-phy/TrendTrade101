@@ -37,6 +37,15 @@ class PortfolioTests(unittest.TestCase):
         a.execute(T+timedelta(minutes=20),{"AAA":100,"BBB":100},tax_year=2026)
         self.assertGreaterEqual(a.cash,0)
 
+    def test_target_plus_fee_reservation_retains_rounding_remainder(self):
+        a=account()
+        o=buy(a,price=101,target=1000)
+        self.assertEqual(o.quantity,9)
+        self.assertAlmostEqual(o.reservation,1000+a.fee(1000))
+        a.execute(T+timedelta(minutes=20),{"AAA":102},tax_year=2026)
+        self.assertEqual(a.positions["AAA"].quantity,9)
+        self.assertEqual(a.reserved,0)
+
     def test_missing_price_retains_pending_order(self):
         a=account();o=buy(a)
         a.execute(T+timedelta(minutes=20),{},tax_year=2026)

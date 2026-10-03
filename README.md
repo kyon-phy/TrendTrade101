@@ -2,7 +2,7 @@
 
 Auditable US and Japan trend-strategy research with a read-only progress console.
 
-**Current state:** a tested research foundation, not a completed historical backtest. Canonical configuration v0.12 has been read. Exact input bytes are unavailable in this executor, accepted execution definitions await canonical synchronization, and real-data execution remains locked. No baseline, optimization or final-holdout returns have been calculated.
+**Current state:** a tested research foundation, not a completed historical backtest. Canonical configuration v0.13 has been read in full and the local execution/scoring definitions reconciled. Exact input bytes remain unavailable in this executor, Yahoo access returned HTTP 403, and real-data execution remains locked. No baseline, optimization or final-holdout returns have been calculated.
 
 ## Open the console
 
@@ -38,9 +38,9 @@ The last complete minute week and daily month remain sealed. Minute training/tes
 
 ## Inputs and privacy
 
-The exact four delegated input files belong in `.private/inputs/` after supported materialization. The validator checks supplied SHA256 values, 201 membership rows, 127 unique market/ticker pairs, ordered manifest groups and the single US daily NKE-to-PYPL substitution. It does not reconstruct a missing pool.
+The four exact reviewed input files belong in `config/inputs/` when approved for public configuration. If that directory is absent, the loader uses `.private/inputs/` for supported private materialization. It does not silently fall back when a present public input directory fails validation. The validator checks supplied SHA256 values, 201 membership rows, 127 unique market/ticker pairs, ordered manifest groups and the single US daily NKE-to-PYPL substitution. It does not reconstruct a missing pool.
 
-Private source identities, credentials, conversations, third-party report bodies and vendor price caches must never be committed. `.private/`, `data/` and `runs/` are ignored. Data capture writes private content-addressed snapshots with retrieval metadata. No capture has yet been performed in this checkout.
+Private source identities, credentials, conversations, third-party report bodies and vendor price caches must never be committed. `.private/`, `data/` and `runs/` are ignored. Data capture writes private content-addressed snapshots with retrieval metadata. A representative connectivity request failed with HTTP 403; no vendor price snapshot was obtained.
 
 Frozen historical US baskets are user-fixed estimated subsets, not certified whole-market Top30. Applying later minute membership information to earlier July observations introduces selection look-ahead bias. Current-membership survivorship, excluded dividends, zero spread/slippage, conditional JP fees and simplified taxes remain explicit limitations.
 
