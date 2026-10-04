@@ -5,14 +5,14 @@ This is a concise evidence index, not the strategy authority or a claim that the
 ```json
 {
   "schema_version": 1,
-  "recorded_at": "2026-10-04T09:53:31.993143+00:00",
+  "recorded_at": "2026-10-04T10:04:46.659527+00:00",
   "verified_checkpoint": {
-    "commit": "c1be2216a79bc7127b61c0243ef375181e61a321",
-    "tests_passed": 109,
+    "commit": "817134bd55e8b230bc95c189503107cf29a73868",
+    "tests_passed": 118,
     "test_scope": "synthetic_software",
-    "ci_url": "https://github.com/kyon-phy/TrendTrade101/actions/runs/37184472204",
+    "ci_url": "https://github.com/kyon-phy/TrendTrade101/actions/runs/37193649266",
     "artifact_name": "research-dashboard",
-    "artifact_sha256": "3075bb530ff62989b0790e673fe465cec59bb4b7369df5f8808281a11bd47d39"
+    "artifact_sha256": "607133c25382e8d643f583d732d3b989182945d00759cd6f0b67b6108210ab20"
   },
   "configuration": {
     "version": "v0.15",
@@ -54,8 +54,9 @@ This is a concise evidence index, not the strategy authority or a claim that the
     },
     {
       "id": "pilot_private_input_and_evidence",
-      "status": "pending",
-      "evidence": "docs/daily-pilot-contract.md"
+      "status": "blocked",
+      "evidence": "docs/daily-pilot-contract.md",
+      "reason": "Current supported private transfer failed twice; no ZIP bytes present. Bounded retry exhausted."
     }
   ],
   "pending_decisions": [
@@ -63,18 +64,21 @@ This is a concise evidence index, not the strategy authority or a claim that the
     "D003"
   ],
   "next_actions": [
-    "Receive the private existing-25 cache using docs/daily-pilot-contract.md; preserve pending audit entries. No Yahoo requests or public price uploads.",
-    "Complete price-basis, historical legal-lot, issuer/action evidence and remaining technical verification. Freeze eligible pilot dates and sequester the formal daily final month before any returns.",
-    "Run the isolated FULL-only daily baseline after applicable gates pass. Do not optimize or consume the formal holdout.",
-    "Obtain the requested pinned Ponytail text review through the coordinating owner; no Ponytail tool or skill is available in this executor."
+    "Resolve private input delivery with the coordinating owner. First supported Library transfer and one bounded retry failed; no further transfer fallback is authorized by this receipt.",
+    "After readable bytes arrive, verify the expected ZIP hash and safely extract; prioritize actual-cache mechanical and indicator diagnostics. Preserve all pending economic audit entries.",
+    "Complete price-basis, legal-lot, issuer/action evidence and remaining technical verification; sequester the formal daily final month before any returns. Run only the isolated FULL baseline after applicable gates pass.",
+    "The coordinating owner reports the pinned Ponytail plain-text review of 817134bd55e8b230bc95c189503107cf29a73868 complete, with two optional reuse cleanups and no identified correctness issue. This executor has no direct review artifact; defer optional refactoring."
   ],
   "pilot": {
     "scope": "existing_25_daily_FULL_fixed_baseline",
-    "status": "not_run",
+    "status": "blocked_private_transfer",
     "dataset_sha256": null,
     "exact_interval": "not_frozen",
     "formal_holdout_consumed": false,
-    "evidence": "docs/daily-pilot-contract.md"
+    "evidence": "docs/daily-pilot-contract.md",
+    "input_package_sha256_expected": "68e795b24de5f6d0f3f32caa960c026f32b3d8a8389d68f9c77a615904f1d638",
+    "input_bytes_verified": false,
+    "diagnostics_run": false
   }
 }
 ```

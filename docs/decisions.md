@@ -351,3 +351,40 @@ This incremental log begins with checked repository evidence and the current nar
   "supersedes": null
 }
 ```
+
+## D019
+
+```json
+{
+  "id": "D019",
+  "recorded_at": "2026-10-04T10:04:46.659527+00:00",
+  "domain": "software",
+  "status": "verified",
+  "summary": "Pilot implementation commit 817134bd55e8b230bc95c189503107cf29a73868 passed 118 synthetic software tests. Fresh read-only observations confirm exact-head CI success and an unexpired research-dashboard artifact. The coordinating owner separately reports its pinned Ponytail plain-text review complete, with no identified correctness issue and two optional reuse cleanups; the review artifact was not independently accessed here. No historical performance is verified.",
+  "verification_scope": "synthetic_software",
+  "evidence": [
+    "https://github.com/kyon-phy/TrendTrade101/actions/runs/37193649266",
+    "tests/test_daily_pilot.py",
+    "docs/daily-pilot-contract.md"
+  ],
+  "pending_fields": [],
+  "supersedes": "D016"
+}
+```
+
+## D020
+
+```json
+{
+  "id": "D020",
+  "recorded_at": "2026-10-04T10:04:46.659527+00:00",
+  "domain": "data",
+  "status": "blocked",
+  "summary": "The supplied private pilot ZIP was prepared through the current supported Library route, but the initial download and one bounded retry both returned download failed. Neither destination contains readable bytes. Expected size/hash are known, but package hash, extraction, actual-cache diagnostics and performance replay remain unverified/unexecuted. No generic downloader, public upload, Yahoo request or alternate route was attempted.",
+  "evidence": [
+    "docs/daily-pilot-contract.md"
+  ],
+  "pending_fields": [],
+  "supersedes": null
+}
+```

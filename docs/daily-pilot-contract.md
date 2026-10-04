@@ -117,3 +117,16 @@ audit, unresolved material action, unknown price basis or unverified pilot scope
 The dashboard labels these outputs **Exploratory daily pilot** and keeps formal
 research stages unchanged. The current two-year cache description is a handoff
 claim until the private bytes, calendar and evidence have been audited here.
+
+## Current transfer receipt
+
+The newly supplied private package is expected to be 816,213 bytes with SHA256
+`68e795b24de5f6d0f3f32caa960c026f32b3d8a8389d68f9c77a615904f1d638`.
+On 2026-10-04 the current supported Library transfer helper returned
+`library file transfer failed: download failed` on the initial attempt and the
+one permitted retry, using separate consumer-local private destinations. Neither
+destination contained a readable ZIP. The package digest has therefore not been
+verified here; no extraction, actual-cache diagnostic or performance replay ran.
+This is a private-input transfer failure, separate from the Yahoo preflight
+blocker. The coordinating owner must resolve supported delivery before local
+data-dependent work can continue. No alternate download route was attempted.
