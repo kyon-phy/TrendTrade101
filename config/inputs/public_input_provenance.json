@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "TrendTrade101",
-  "source_configuration_version": "v0.15",
+  "source_configuration_version": "v0.18",
   "publication_kind": "sanitized_public_projection",
   "strategy_parameters_unchanged": true,
   "membership_count": 201,
@@ -32,10 +32,10 @@
     },
     {
       "name": "TrendTrade101_Backtest_Configuration.md",
-      "source_sha256": "0d0c647363ae61fd3287ad4f6ac922a12510e2945358b6d3ff17158f460be1c0",
-      "public_sha256": "2a297ba5f2203ba278a2e6b905a5637aaf30ae50852b0101db15b344a61cd1e8",
-      "source_size_bytes": 124694,
-      "public_size_bytes": 124777
+      "source_sha256": "900ea310774e2540f8571dca5a075567542423d3fd1c34cfc6c38e0b0d7c2126",
+      "public_sha256": "ab22f57375a3c5dcecdf8288b52383058605095f0fb38862f3f28550cf350301",
+      "source_size_bytes": 148100,
+      "public_size_bytes": 148183
     }
   ],
   "sanitization": {
@@ -56,7 +56,7 @@
     "TrendTrade101_Backtest_Configuration.md": [
       "Added a public-projection notice and canonical source hash; clarified the authority relationship.",
       "Removed two unrelated conversation/archival-translation references.",
-      "Retained the existing public CSV and JSON-manifest hashes; all strategy, pilot-scope and membership tables match canonical v0.15."
+      "Retained existing public membership artifact hashes; all strategy, hypothesis, grid and membership tables match canonical v0.18."
     ]
   },
   "validation": {
@@ -66,7 +66,10 @@
     "csv_change_count": 1,
     "canonical_source_bytes_verified": true,
     "fixed_membership_tables_preserved_from_v013": true,
-    "fixed_membership_tables_preserved_from_v014": true
+    "fixed_membership_tables_preserved_from_v014": true,
+    "fixed_membership_tables_preserved_from_v015": true,
+    "fixed_membership_tables_preserved_from_v016": true,
+    "fixed_membership_tables_preserved_from_v017": true
   },
   "scope": "Project configuration, fixed membership, and public-source references only. No price-history caches, credentials, private communications, or backtest results are included.",
   "not_bundled": [
@@ -74,7 +77,7 @@
     "frozen_review_source_201.csv"
   ],
   "interpretation": "Source checksums identify original source bytes. Public checksums identify the sanitized public files and must not be confused with the originals. Public inputs do not establish price coverage, implementation correctness, or completed strategy returns.",
-  "strategy_parameters_comparison_basis": "Public projection versus canonical v0.15, not versus prior configuration versions.",
+  "strategy_parameters_comparison_basis": "Public projection versus canonical v0.18, not versus prior configuration versions.",
   "configuration_changes_from_v013": [
     "Historical executable prices/share units; verified effective-date split quantity, per-share-cost and indicator scaling preserve total cost.",
     "Pause affected runs for unverified special corporate actions.",
@@ -84,9 +87,11 @@
   "change_status": {
     "approved": true,
     "recorded": true,
-    "pilot_scope_implementation_verified": false,
-    "pilot_applicable_data_audit_verified": false,
-    "pilot_execution_verified": false
+    "grid_implementation_verified": false,
+    "grid_execution_verified": false,
+    "economic_source_verification_complete": false,
+    "formal_readiness_unchanged": true,
+    "benchmark_distribution_verified": false
   },
   "unchanged_membership_metadata_basis": "Existing public input provenance at repository commit f225b0772e20c6b30ee499ecae04770d61369b8e; no member or membership artifact changed in this configuration update.",
   "configuration_changes_from_v014": [
@@ -100,7 +105,7 @@
     "us_members": 12,
     "jp_members": 13,
     "frequency": "daily",
-    "run_kind": "exploratory_baseline",
+    "run_kind": "assumption_based_baseline",
     "source": "existing_cache_only",
     "allocation": "fixed_initial_capital_1_over_15",
     "reported_cache_bounds": {
@@ -114,9 +119,188 @@
       ],
       "285A.T_first": "2024-12-18"
     },
-    "actual_eligible_window": "pending_applicable_audit_and_formal_holdout_isolation",
+    "actual_eligible_window": {
+      "start_inclusive": "2024-11-01",
+      "end_exclusive": "2026-09-01",
+      "timezone_basis": "market_local_trading_dates",
+      "late_ipo_readiness_respected": true
+    },
     "optimization": false,
     "formal_holdout_evaluation": false,
-    "audit_gate_required": true
+    "audit_gate_required": true,
+    "warmup": "Available October2024 observations only before scored start; post-IPO warmup for later listings.",
+    "evidence_mode": "qualified_hypothetical_simulation_not_formal_verified_data",
+    "formal_verified_data_required_for_qualified_mode": false,
+    "mechanical_validation_required": true,
+    "approved_economic_assumptions": {
+      "PA01": "cached_ohlc_split_only_adjusted",
+      "PA02": "cached_split_records_complete",
+      "PA03": {
+        "US": 1,
+        "JP": 100
+      }
+    },
+    "disclosed_implementation_assumptions": [
+      "continuous_issuer_mapping_within_available_cached_series",
+      "existing_SMA_seeded_EMA_and_Wilder_ADX",
+      "valid_observed_bar_gap_handling",
+      "causal_Open_and_completed_Close_valuation"
+    ],
+    "economic_assumptions_verified": false,
+    "result_label": "Assumption-based original25 daily FULL baseline pilot"
+  },
+  "configuration_changes_from_v015": [
+    "Permit the separate assumption-based original25 daily FULL/fixed-1/15 simulation for 2024-11-01 inclusive through 2026-09-01 exclusive, with October2024 warmup and late-IPO/readiness constraints.",
+    "Explicit approved simulation assumptions: cached OHLC is split-only adjusted, cached split records are complete, and US1/JP100 units apply. Issuer continuity and consistent technical conventions remain disclosed implementation assumptions.",
+    "Retain source assumptions as unverified. Mechanical validity and causal boundaries still apply; formal data-readiness gates and holdout remain unchanged. No optimization or new price fetch."
+  ],
+  "configuration_changes_from_v016": [
+    "Approve a separate original25 DAILY FULL ADX-scaled comparison after completed fixed-result/runtime-configuration/PDF publication. Preserve the completed fixed-run snapshot and results.",
+    "US target: USD10,000 times1 times(signal-time ADX/25 minus0.5); JP target: JPY1,600,000 times1 times(signal-time ADX/25 minus0.5). All other execution, cost, tax, data, dates, membership, assumptions and account-initialization rules remain unchanged.",
+    "Request same-window normalized Nikkei225 and S&P500 price-index curves for reporting only. Source and distribution rights remain pending; no raw benchmark data or curves are included here, and no provider migration or index trading is authorized."
+  ],
+  "adx_comparison_scope": {
+    "universe": "existing_25",
+    "frequency": "daily",
+    "strategy": "FULL",
+    "run_kind": "assumption_based_allocation_comparison",
+    "allocation": "adx_scaled",
+    "us_base_usd": 10000,
+    "jp_base_jpy": 1600000,
+    "position_scale": 1,
+    "adx_denominator": 25,
+    "adx_time": "stored_signal_time",
+    "formula": "base * position_scale * (signal_time_ADX / 25 - 0.5)",
+    "start_inclusive": "2024-11-01",
+    "end_exclusive": "2026-09-01",
+    "warmup": "Same October2024 and late-IPO/readiness rules as fixed pilot.",
+    "accounts": "Fresh independent US100000/JP16000000 accounts, flat at scored start.",
+    "assumptions": "Same PA01-PA04; unverified economic inputs remain assumed.",
+    "input_data": "Same cached original25 equities; exact input hashes required.",
+    "other_strategy_rules_unchanged": true,
+    "optimization": false,
+    "formal_holdout_evaluation": false,
+    "prerequisite": "Completed fixed-run result, actual runtime configuration and PDF publication.",
+    "preserved_fixed_run_source_version": "v0.16",
+    "preserved_fixed_run_source_sha256": "b727826e136611f31822915375903c88967243e43e791cb5c52d89c613f8fe6b",
+    "retrospective_fixed_run_configuration_changes": false
+  },
+  "benchmark_reporting": {
+    "US": "S&P500 price index",
+    "JP": "Nikkei225 price index",
+    "role": "reporting_only",
+    "window": "same scored interval",
+    "normalization": 100,
+    "base_date": "first common valid scored observation for each market panel; disclose date and reduced span if any",
+    "strategy_basis": "after-fee/after-tax account equity",
+    "index_basis": "price index without reinvested dividends or strategy fees/taxes",
+    "source_and_distribution_status": "pending_verification",
+    "public_raw_data_or_curve_publication": "requires applicable permission; not included in this configuration artifact",
+    "equity_provider_migration": false
+  },
+  "configuration_changes_from_v017": [
+    "Authorize a separate bounded in-sample original25 daily five-entry-arm experiment with fixed1/15 allocation, unchanged cache/assumptions and 2024-11-01 inclusive to2026-09-01 exclusive.",
+    "Apply only relevant ADX20/25/30, N3/5/8 and histogram-peak-drawdown30/40/50 axes: MA_ONLY3, MACD_HIST3, MA_ADX9, MACD_HIST_ADX9, FULL27 per market;102 total. Baseline tuples are already included.",
+    "Report each market/arm's highest individual after-tax return subject to maximum drawdown<=30%; ties use lower drawdown then ascending active axes ADX,N,drawdown. Sparse<5 closures remains a flag, and all trials must remain visible.",
+    "Keep optional neighborhood-stability reporting separate and preserve the formal walk-forward selector/holdout. Preserve fixed v0.16 and ADX v0.17 artifacts; disclose multiple comparisons, repeated historical inspection and overfitting."
+  ],
+  "in_sample_grid_scope": {
+    "experiment_id": "original25_daily_in_sample_entry_grid",
+    "universe": "existing_25",
+    "frequency": "daily",
+    "allocation": "fixed_initial_capital_1_over_15",
+    "markets": [
+      "US",
+      "JP"
+    ],
+    "start_inclusive": "2024-11-01",
+    "end_exclusive": "2026-09-01",
+    "warmup": "Same October2024 and late-IPO/readiness policy.",
+    "hypotheses": "Same PA01-PA04, assumed not source-verified.",
+    "fresh_flat_account_for_each_candidate": true,
+    "candidate_axes": {
+      "adx_threshold": [
+        20,
+        25,
+        30
+      ],
+      "cross_window_bars": [
+        3,
+        5,
+        8
+      ],
+      "hist_exit_drawdown_pct": [
+        30,
+        40,
+        50
+      ]
+    },
+    "active_axes_by_arm": {
+      "MA_ONLY": [
+        "hist_exit_drawdown_pct"
+      ],
+      "MACD_HIST": [
+        "hist_exit_drawdown_pct"
+      ],
+      "MA_ADX": [
+        "adx_threshold",
+        "hist_exit_drawdown_pct"
+      ],
+      "MACD_HIST_ADX": [
+        "adx_threshold",
+        "hist_exit_drawdown_pct"
+      ],
+      "FULL": [
+        "adx_threshold",
+        "cross_window_bars",
+        "hist_exit_drawdown_pct"
+      ]
+    },
+    "runtime_aliases": {
+      "SMA_ONLY": "MA_ONLY",
+      "MACD_HIST_ONLY": "MACD_HIST",
+      "SMA_ADX": "MA_ADX"
+    },
+    "candidates_per_arm_per_market": {
+      "MA_ONLY": 3,
+      "MACD_HIST": 3,
+      "MA_ADX": 9,
+      "MACD_HIST_ADX": 9,
+      "FULL": 27
+    },
+    "candidates_per_market": 51,
+    "total_distinct_candidates": 102,
+    "baseline_tuples_already_in_grid": true,
+    "baseline_arms_first": true,
+    "ranking_groups": "market_by_entry_arm",
+    "ranking_primary": "individual_full_interval_after_tax_return_descending",
+    "max_drawdown_eligibility": 0.3,
+    "tie_break": [
+      "max_drawdown_ascending",
+      "active_parameter_tuple_ascending"
+    ],
+    "tuple_axis_order": [
+      "adx_threshold",
+      "cross_window_bars",
+      "hist_exit_drawdown_pct"
+    ],
+    "inactive_axes_omitted": true,
+    "sparse_flag_below_complete_closures": 5,
+    "minimum_trade_filter": null,
+    "all_trials_disclosed": true,
+    "optional_secondary": "eligible_neighborhood_median_after_tax_return_reported_separately",
+    "formal_selector_changed": false,
+    "formal_holdout_consumed": false,
+    "adaptive_grid_expansion": false,
+    "adx_weighted_grid": false,
+    "result_label": "Assumption-based in-sample original25 daily entry-arm grid",
+    "execution_status": "pending_at_configuration_recording"
+  },
+  "preserved_adx_execution_observation": {
+    "source_version": "v0.17",
+    "source_sha256": "b0a5a25e4e7ad7ae813c0fc40a75bc21a4ff796a30e5e0262e0921fcd2a542ba",
+    "summary_sha256": "b1e61a3c9170eab91f8128165070a044171f3de66e5a8c0d0508ec3f6cc36559",
+    "summary_status": "hypothetical_completed",
+    "observation_scope": "Preserved run artifact; not changed strategy parameters or economic source/benchmark-rights verification."
   }
 }
