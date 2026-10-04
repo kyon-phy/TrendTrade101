@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "TrendTrade101",
-  "source_configuration_version": "v0.14",
+  "source_configuration_version": "v0.15",
   "publication_kind": "sanitized_public_projection",
   "strategy_parameters_unchanged": true,
   "membership_count": 201,
@@ -32,10 +32,10 @@
     },
     {
       "name": "TrendTrade101_Backtest_Configuration.md",
-      "source_sha256": "79c788ca74c3e21b3d56fbfe954f67d57817aa492e29b2b4fd06db08c2a3690d",
-      "public_sha256": "48fa986f650168253d8eeff612178376f50eeeec0868efce0e83408f7f85f034",
-      "source_size_bytes": 115881,
-      "public_size_bytes": 115964
+      "source_sha256": "0d0c647363ae61fd3287ad4f6ac922a12510e2945358b6d3ff17158f460be1c0",
+      "public_sha256": "2a297ba5f2203ba278a2e6b905a5637aaf30ae50852b0101db15b344a61cd1e8",
+      "source_size_bytes": 124694,
+      "public_size_bytes": 124777
     }
   ],
   "sanitization": {
@@ -56,7 +56,7 @@
     "TrendTrade101_Backtest_Configuration.md": [
       "Added a public-projection notice and canonical source hash; clarified the authority relationship.",
       "Removed two unrelated conversation/archival-translation references.",
-      "Retained the existing public CSV and JSON-manifest hashes in the operative artifact references; all strategy and membership tables match canonical v0.14."
+      "Retained the existing public CSV and JSON-manifest hashes; all strategy, pilot-scope and membership tables match canonical v0.15."
     ]
   },
   "validation": {
@@ -65,7 +65,8 @@
     "configuration_parameter_tables_identical": true,
     "csv_change_count": 1,
     "canonical_source_bytes_verified": true,
-    "fixed_membership_tables_preserved_from_v013": true
+    "fixed_membership_tables_preserved_from_v013": true,
+    "fixed_membership_tables_preserved_from_v014": true
   },
   "scope": "Project configuration, fixed membership, and public-source references only. No price-history caches, credentials, private communications, or backtest results are included.",
   "not_bundled": [
@@ -73,7 +74,7 @@
     "frozen_review_source_201.csv"
   ],
   "interpretation": "Source checksums identify original source bytes. Public checksums identify the sanitized public files and must not be confused with the originals. Public inputs do not establish price coverage, implementation correctness, or completed strategy returns.",
-  "strategy_parameters_comparison_basis": "Public projection versus canonical v0.14, not versus prior configuration versions.",
+  "strategy_parameters_comparison_basis": "Public projection versus canonical v0.15, not versus prior configuration versions.",
   "configuration_changes_from_v013": [
     "Historical executable prices/share units; verified effective-date split quantity, per-share-cost and indicator scaling preserve total cost.",
     "Pause affected runs for unverified special corporate actions.",
@@ -83,8 +84,39 @@
   "change_status": {
     "approved": true,
     "recorded": true,
-    "implementation_synchronized_to_v014": false,
-    "focused_verification_complete": false
+    "pilot_scope_implementation_verified": false,
+    "pilot_applicable_data_audit_verified": false,
+    "pilot_execution_verified": false
   },
-  "unchanged_membership_metadata_basis": "Existing public input provenance at repository commit f225b0772e20c6b30ee499ecae04770d61369b8e; no member or membership artifact changed in this configuration update."
+  "unchanged_membership_metadata_basis": "Existing public input provenance at repository commit f225b0772e20c6b30ee499ecae04770d61369b8e; no member or membership artifact changed in this configuration update.",
+  "configuration_changes_from_v014": [
+    "Authorize a separately labeled original25 exploratory daily baseline pilot using the existing roughly two-year cache only.",
+    "Retain all applicable audit gates; freeze actual eligible dates and isolate the formal reserved daily month before any pilot performance inspection.",
+    "No fresh price fetch, optimization, parameter tuning or formal holdout evaluation under this pilot scope; formal five-year daily and maximum-minute plans remain unchanged."
+  ],
+  "pilot_scope": {
+    "universe": "existing_25",
+    "members": 25,
+    "us_members": 12,
+    "jp_members": 13,
+    "frequency": "daily",
+    "run_kind": "exploratory_baseline",
+    "source": "existing_cache_only",
+    "allocation": "fixed_initial_capital_1_over_15",
+    "reported_cache_bounds": {
+      "US": [
+        "2024-10-02",
+        "2026-10-01"
+      ],
+      "JP": [
+        "2024-10-02",
+        "2026-10-02"
+      ],
+      "285A.T_first": "2024-12-18"
+    },
+    "actual_eligible_window": "pending_applicable_audit_and_formal_holdout_isolation",
+    "optimization": false,
+    "formal_holdout_evaluation": false,
+    "audit_gate_required": true
+  }
 }
