@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "TrendTrade101",
-  "source_configuration_version": "v0.13",
+  "source_configuration_version": "v0.14",
   "publication_kind": "sanitized_public_projection",
   "strategy_parameters_unchanged": true,
   "membership_count": 201,
@@ -32,10 +32,10 @@
     },
     {
       "name": "TrendTrade101_Backtest_Configuration.md",
-      "source_sha256": "707cf2472d97d535061395a439fbe81764e9fec53b303edb88419d90c5553bce",
-      "public_sha256": "ea3038c311c00be7db448ee63ac7454c59f5ad91e88a38068c47ddad945a30b7",
-      "source_size_bytes": 105359,
-      "public_size_bytes": 105441
+      "source_sha256": "79c788ca74c3e21b3d56fbfe954f67d57817aa492e29b2b4fd06db08c2a3690d",
+      "public_sha256": "48fa986f650168253d8eeff612178376f50eeeec0868efce0e83408f7f85f034",
+      "source_size_bytes": 115881,
+      "public_size_bytes": 115964
     }
   ],
   "sanitization": {
@@ -54,21 +54,37 @@
       "Added public-projection notice; clarified that original reviewed-source snapshot is not bundled."
     ],
     "TrendTrade101_Backtest_Configuration.md": [
-      "Added public-projection notice and source hash; clarified authority relationship.",
-      "Removed two unrelated private-conversation/archival-translation references.",
-      "Updated operative public CSV and JSON-manifest hashes; no strategy or membership table changed."
+      "Added a public-projection notice and canonical source hash; clarified the authority relationship.",
+      "Removed two unrelated conversation/archival-translation references.",
+      "Retained the existing public CSV and JSON-manifest hashes in the operative artifact references; all strategy and membership tables match canonical v0.14."
     ]
   },
   "validation": {
     "ordered_group_count": 8,
     "no_duplicate_tickers_within_groups": true,
     "configuration_parameter_tables_identical": true,
-    "csv_change_count": 1
+    "csv_change_count": 1,
+    "canonical_source_bytes_verified": true,
+    "fixed_membership_tables_preserved_from_v013": true
   },
   "scope": "Project configuration, fixed membership, and public-source references only. No price-history caches, credentials, private communications, or backtest results are included.",
   "not_bundled": [
     "stock_universe_review_members.csv",
     "frozen_review_source_201.csv"
   ],
-  "interpretation": "Source checksums identify original source bytes. Public checksums identify the sanitized public files and must not be confused with the originals. Public inputs do not establish price coverage, implementation correctness, or completed strategy returns."
+  "interpretation": "Source checksums identify original source bytes. Public checksums identify the sanitized public files and must not be confused with the originals. Public inputs do not establish price coverage, implementation correctness, or completed strategy returns.",
+  "strategy_parameters_comparison_basis": "Public projection versus canonical v0.14, not versus prior configuration versions.",
+  "configuration_changes_from_v013": [
+    "Historical executable prices/share units; verified effective-date split quantity, per-share-cost and indicator scaling preserve total cost.",
+    "Pause affected runs for unverified special corporate actions.",
+    "Fresh initial-capital flat accounts for every training candidate; continuous accounts for ordinary rolling OOS.",
+    "Separate fresh initial-capital flat accounts for final baseline and selected strategy, with earlier history only for indicator warmup."
+  ],
+  "change_status": {
+    "approved": true,
+    "recorded": true,
+    "implementation_synchronized_to_v014": false,
+    "focused_verification_complete": false
+  },
+  "unchanged_membership_metadata_basis": "Existing public input provenance at repository commit f225b0772e20c6b30ee499ecae04770d61369b8e; no member or membership artifact changed in this configuration update."
 }
