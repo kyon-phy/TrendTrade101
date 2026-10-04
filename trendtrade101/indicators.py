@@ -1,7 +1,7 @@
 """Streaming causal indicators. Initialization is explicit, never inferred.
 
 SMA-seeded EMA and Wilder smoothing are available technical conventions.
-They remain pending choices for real-data runs under configuration v0.13.
+They remain pending choices for real-data runs under configuration v0.14.
 Missing/nonfinite bars are rejected; the caller must audit gaps.
 """
 from __future__ import annotations
@@ -65,7 +65,7 @@ class Indicators:
 
     def apply_split(self, ratio: float):
         """Rescale past price state at the split's effective time."""
-        if ratio <= 0:
+        if not isfinite(ratio) or ratio <= 0:
             raise ValueError("Invalid split ratio")
         for sma in (self.fast,self.slow):
             sma.values = deque((v/ratio for v in sma.values),maxlen=sma.period)

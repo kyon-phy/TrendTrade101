@@ -36,7 +36,8 @@ class AuditPackageTests(unittest.TestCase):
                 "members":{"TEST":{"lot":1,"availability":"available","first_trade_date":"2020-01-01",
                     "file":"synthetic.json","sha256":sha256(root/"synthetic.json"),
                     "retrieved_at":"2026-07-01T09:32:00-04:00","request":{"fixture":True}}},
-                "splits":[{"ticker":"TEST","at":"2026-07-01T09:30:00-04:00","ratio":2}]}
+                "splits":[{"ticker":"TEST","at":"2026-07-01T09:30:00-04:00","ratio":2}],
+                "unresolved_corporate_actions":[{"ticker":"TEST","type":"unverified_distribution"}]}
             write_json(root/"capture.json",capture)
             with patch("trendtrade101.audit_package.project_members",return_value=rows),patch("trendtrade101.dataset.project_members",return_value=rows):
                 result=audit_local_charts(root,root/"capture.json",root/"output")
@@ -47,3 +48,5 @@ class AuditPackageTests(unittest.TestCase):
             self.assertEqual(ds.open_quotes[1].open,11)
             self.assertEqual(ds.manifest["per_symbol_audit"]["TEST"]["counts"]["incomplete_at_retrieval"],1)
             self.assertEqual(ds.manifest["complete_period_ends"],[])
+            self.assertEqual(result["unresolved_action_symbols"],["TEST"])
+            self.assertEqual(ds.manifest["unresolved_corporate_actions"],capture["unresolved_corporate_actions"])

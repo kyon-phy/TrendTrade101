@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "source_version": "v0.13",
-  "source_sha256": "707cf2472d97d535061395a439fbe81764e9fec53b303edb88419d90c5553bce",
+  "source_version": "v0.14",
+  "source_sha256": "79c788ca74c3e21b3d56fbfe954f67d57817aa492e29b2b4fd06db08c2a3690d",
   "execution_ready": false,
   "markets": {
     "US": {
@@ -108,10 +108,7 @@
     "indicator_initialization",
     "signal_gap_policy",
     "valuation_cadence",
-    "fold_account_state",
-    "final_account_state",
     "partial_window_policy",
-    "split_lot_basis",
     "corporate_distributions",
     "calendar_and_holdout_dates",
     "jp_scaled_base"
@@ -121,7 +118,9 @@
     "Minute memberships use later July/August selection information on potentially earlier July prices.",
     "US historical baskets are fixed estimated subsets, not certified full-market Top30.",
     "Zero spread/slippage, excluded dividends/FX, conditional JP zero fees and simplified tax.",
-    "Vendor coverage, auctions, actions, IPO gaps and historical lot units require audit."
+    "Vendor coverage, auctions, actions, IPO gaps and historical lot units require audit.",
+    "Final baseline and selected accounts restart separately; final results do not continue the ordinary OOS ledger.",
+    "Unverified special corporate actions pause affected runs without removing frozen members."
   ],
   "canonical_definitions_synchronized": true,
   "accepted_definitions": [
@@ -134,7 +133,10 @@
     "scheduled_liquidation",
     "tax_timing_and_carry",
     "objective_and_neighborhood",
-    "sparse_trade_threshold"
+    "sparse_trade_threshold",
+    "split_lot_basis",
+    "fold_account_state",
+    "final_account_state"
   ],
   "signal_rules": {
     "window_includes_current": true,
@@ -148,5 +150,20 @@
     "shrink_only": true,
     "tax_timing": "realization_accrual",
     "cross_year_loss_carry": false
+  },
+  "account_state": {
+    "training": "fresh_initial_flat",
+    "ordinary_oos": "continuous",
+    "final_baseline": "fresh_initial_flat",
+    "final_selected": "fresh_initial_flat",
+    "fresh_account_history": "indicator_warmup_only"
+  },
+  "corporate_actions": {
+    "price_quantity_basis": "historical_unadjusted_split_events",
+    "split_quantity": "multiply_ratio",
+    "split_cost_per_share": "divide_ratio",
+    "split_total_cost": "preserve",
+    "split_indicators": "rescale_price_dimensional_state_at_effective_time",
+    "unverified_special_actions": "block_affected_run"
   }
 }

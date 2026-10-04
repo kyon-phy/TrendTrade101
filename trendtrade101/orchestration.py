@@ -6,7 +6,7 @@ import json
 import os
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from .dataset import Dataset,fingerprint,load_dataset
+from .dataset import Dataset,fingerprint,load_dataset,unresolved_action_symbols
 from .engine import replay
 from .inputs import project_members,symbols_for
 from .portfolio import Ledger,LedgerPolicy
@@ -15,6 +15,24 @@ from .schedule import liquidation_schedule
 from .reporting import summarize
 from .signals import SignalRules
 from .storage import read_json,write_json,utcnow
+
+ACCOUNT_STATE_POLICY={"training":"fresh_initial_flat","ordinary_oos":"continuous",
+                      "final_baseline":"fresh_initial_flat","final_selected":"fresh_initial_flat",
+                      "fresh_account_history":"indicator_warmup_only"}
+CORPORATE_ACTION_POLICY={"price_quantity_basis":"historical_unadjusted_split_events",
+                        "split_quantity":"multiply_ratio","split_cost_per_share":"divide_ratio",
+                        "split_total_cost":"preserve",
+                        "split_indicators":"rescale_price_dimensional_state_at_effective_time",
+                        "unverified_special_actions":"block_affected_run"}
+
+def _validate_accounting(config,dataset,members):
+    if config.get("account_state")!=ACCOUNT_STATE_POLICY or config.get("corporate_actions")!=CORPORATE_ACTION_POLICY:
+        raise ValueError("Accounting policies must match the synchronized approved implementation")
+    if dataset.manifest["price_basis"]!=CORPORATE_ACTION_POLICY["price_quantity_basis"]:
+        raise ValueError("Dataset price/share basis differs from the accounting policy")
+    affected=set(members)&unresolved_action_symbols(dataset.manifest)
+    if affected:
+        raise ValueError("Unverified special corporate actions block this run: "+", ".join(sorted(affected)))
 
 def implementation_digest():
     return fingerprint({p.name:p.read_text() for p in sorted(Path(__file__).parent.glob("*.py"))})
@@ -26,6 +44,7 @@ def freeze_plan(root: Path, dataset: Dataset, universe: str, run_dir: Path) -> d
     config=read_json(root/"config/baseline.json")
     members=symbols_for(project_members(root),dataset.market,universe,dataset.frequency)
     if not members: raise ValueError("Unknown/empty universe")
+    _validate_accounting(config,dataset,members)
     complete=[date.fromisoformat(x) for x in dataset.manifest["complete_session_dates"]]
     period_ends={date.fromisoformat(x) for x in dataset.manifest["complete_period_ends"]}
     holdout=holdout_from_complete_sessions(complete,frequency=dataset.frequency,
@@ -55,8 +74,10 @@ def freeze_plan(root: Path, dataset: Dataset, universe: str, run_dir: Path) -> d
           "parameter_tie_order":["adx_threshold","cross_window","hist_drawdown"],
           "valuation_cadence":"Every observed bar Open and Close and scheduled event; missing observations retain last observable marks.",
           "partial_window_policy":"Require full calendar training and test windows; exclude partial leading/trailing periods.",
-          "initial_position_policy":"Flat at each training start; retain cash and residual positions across ordinary OOS folds.",
-          "final_position_policy":"Separate baseline/selected accounts start flat at original capital; prior bars warm up state only. Pending canonical synchronization.",
+          "initial_position_policy":"Fresh initial capital and flat accounts per training candidate; continuous cash, holdings, tax state and pending orders/reservations across ordinary OOS folds.",
+          "final_position_policy":"Separate baseline/selected accounts start flat at original capital; prior history warms indicators only. Final returns are not a continuation of the OOS account.",
+          "account_state":config["account_state"],"corporate_actions":config["corporate_actions"],
+          "unresolved_action_symbols_outside_run":sorted(unresolved_action_symbols(dataset.manifest)-set(members)),
           "sparse_trade_threshold":5,"minimum_trade_count_filter":None,
           "biases":config["biases"],"final_holdout_reuse":False}
     current=read_json(run_dir/"plan.json")
@@ -73,6 +94,7 @@ def _interval(v):return Interval(date.fromisoformat(v["start"]),date.fromisoform
 
 def _check(root,dataset,plan):
     config=read_json(root/"config/baseline.json")
+    _validate_accounting(config,dataset,plan["members"])
     if dataset.digest!=plan["dataset_digest"] or fingerprint(config)!=plan["configuration_digest"]:
         raise ValueError("Frozen data/configuration no longer matches the research plan")
     if plan.get("implementation_digest")!=implementation_digest():
@@ -91,7 +113,8 @@ def _ledger(config,dataset,plan):
         policy=LedgerPolicy(**config["ledger_policy"]))
 
 def _segment(config,dataset,plan,arm,parameters,interval,ledger=None,allow_entries=True):
-    ledger=ledger or _ledger(config,dataset,plan)
+    initialization="fresh_initial_flat" if ledger is None else "continuous"
+    ledger=ledger if ledger is not None else _ledger(config,dataset,plan)
     bars=[b for b in dataset.bars if b.ticker in plan["members"]]
     events=liquidation_schedule(dataset.sessions,plan["members"],frequency=dataset.frequency,delay_minutes=plan["delay_minutes"])
     result=replay(bars,ledger=ledger,start=midnight(interval.start,plan["timezone"]),
@@ -104,7 +127,9 @@ def _segment(config,dataset,plan,arm,parameters,interval,ledger=None,allow_entri
         open_quotes=[q for q in dataset.open_quotes if q.ticker in plan["members"]],market=dataset.market,
         splits=[a for a in dataset.manifest.get("splits",[]) if a["ticker"] in plan["members"]],**parameters)
     result.update(configuration_version=plan["configuration_version"],dataset_digest=dataset.digest,
-                  market=plan["market"],universe=plan["universe"],biases=plan["biases"])
+                  market=plan["market"],universe=plan["universe"],biases=plan["biases"],
+                  account_initialization=initialization,account_state_policy=plan["account_state"],
+                  price_quantity_basis=plan["corporate_actions"]["price_quantity_basis"])
     return result,ledger
 
 def run_baseline(root:Path,dataset:Dataset,run_dir:Path,*,arms=None):

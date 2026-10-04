@@ -22,6 +22,16 @@ REQUIRED_AUDITS=("calendar","timestamps","coverage","maximum_history","identity_
 def fingerprint(value) -> str:
     return hash_bytes(json.dumps(value,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
 
+def unresolved_action_symbols(manifest: dict) -> set[str]:
+    """Keep unresolved economics explicit; never silently discard a member."""
+    actions=manifest.get("unresolved_corporate_actions",[])
+    if not isinstance(actions,list):
+        raise ValueError("Unresolved corporate actions require an explicit event list")
+    for action in actions:
+        if not isinstance(action,dict) or action.get("ticker") not in manifest["members"] or not action.get("type"):
+            raise ValueError("Unresolved corporate action must identify a frozen ticker and event type")
+    return {action["ticker"] for action in actions}
+
 @dataclass
 class Dataset:
     manifest: dict
@@ -56,6 +66,7 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
     symbols=set(manifest["members"])
     if symbols != selected:
         raise ValueError("Dataset must account for every frozen market/frequency member")
+    unresolved_action_symbols(manifest)
     if manifest["price_basis"]!="historical_unadjusted_split_events":
         raise ValueError("Unsupported price/quantity basis; do not silently use dividend-adjusted prices")
     if not manifest.get("calendar_complete_through"):
@@ -69,8 +80,6 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
         if any(receipt.get(k,{}).get("status")!="verified" or not receipt[k].get("evidence")
                for k in REQUIRED_AUDITS):
             raise ValueError("Incomplete data audit receipt")
-        if manifest.get("unresolved_corporate_actions"):
-            raise ValueError("Unresolved corporate distribution or action")
         if manifest.get("provider")!="Yahoo" or not manifest.get("source_snapshots"):
             raise ValueError("Missing Yahoo snapshot provenance")
         available={t for t,m in manifest["members"].items() if m["availability"]=="available"}
@@ -153,6 +162,8 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
         at=datetime.fromisoformat(action["at"])
         if not at.tzinfo or (action["ticker"],at) in action_keys:
             raise ValueError("Naive or duplicate split event")
+        if any(b.ticker==action["ticker"] and b.start<at<b.end for b in bars):
+            raise ValueError("Split inside an observed bar mixes price units; audit its effective time and OHLC basis")
         action_keys.add((action["ticker"],at))
     digest=fingerprint({"manifest":manifest,"bars_sha256":manifest["bars_sha256"],"sources":sources})
     return Dataset(manifest,digest,bars,sessions,path,quotes)

@@ -45,7 +45,9 @@ function renderResults(){
   for(const r of results){
     const row=node('article','','result-row'),m=r.metrics;
     row.append(node('h3',r.universe+' · '+r.arm),node('p',r.phase.replaceAll('_',' ')+' · '+r.configuration_version));
+    if(r.account_initialization)row.append(node('p',r.account_initialization==='fresh_initial_flat'?'Fresh initial-capital flat account':'Continuous ordinary out-of-sample account'));
     const values=node('dl');
+    if(m.initial_equity!==undefined)values.append(node('dt','Starting account equity'),node('dd',m.initial_equity.toLocaleString(undefined,{maximumFractionDigits:2})+' '+(r.market==='JP'?'JPY':'USD')));
     for(const [label,value] of [['Gross return',m.gross_return],['After-fee return',m.after_fee_return],['After-tax return',m.after_tax_return],['Maximum drawdown',m.max_drawdown],['Win rate',m.win_rate],['Calendar-time capital utilization',m.calendar_time_weighted_capital_utilization],['Maximum single-position share',m.maximum_single_position_equity_share]]){
       if(value!==undefined&&value!==null)values.append(node('dt',label),node('dd',(100*value).toFixed(2)+'%'));
     }

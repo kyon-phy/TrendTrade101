@@ -8,7 +8,7 @@ Without that public directory, `.private/inputs/` uses the distinct `original_so
 
 ## Private capture package
 
-The network blocker must be resolved through authorized environment setup. The code does not fetch Yahoo from CI or another environment.
+The latest parent-observed request still returned HTTP 429 despite effective hostname authorization; see [network evidence](network-access.md). The code does not fetch Yahoo from CI or another environment.
 
 `audit-local` reads existing captured JSON files. Its capture manifest contains:
 
@@ -17,7 +17,7 @@ The network blocker must be resolved through authorized environment setup. The c
 - Every frozen market/frequency member with lot, dataset availability, reason for missing history, issuer's first trade date, source file, SHA256, retrieval timestamp and request parameters.
 - Verified split events with symbol, effective timestamp and ratio; an explicitly reviewed vendor OHLC basis.
 - Evidence-backed review entries for calendar, timestamps, coverage, maximum accessible history, issuer/IPO identity, price adjustments, corporate actions, historical lots and missing data.
-- An empty unresolved-corporate-action list. Unknown distributions or fractional split entitlements block execution.
+- An explicit unresolved-corporate-action list, with frozen ticker and event type for each known unresolved economic treatment. Every affected run is blocked before replay; unrelated baskets may be prepared without deleting the member or event. Unidentified events fail package validation. Fractional split entitlements still block affected execution.
 
 Availability is a dataset-wide audit statement, not permission to remove earlier history because a security is currently halted. An issuer's earlier ticker reuse is never spliced into its history.
 
@@ -45,7 +45,7 @@ These commands exist and are tested using deterministic synthetic fixtures. They
 
 Plans bind the configuration, implementation and dataset digests before outcomes. Candidate choices are written before their subsequent test segment. Baseline completion is required before optimization. Training accounts start flat; ordinary OOS folds retain cash, tax ledger and residual positions, while entry targets still use fixed initial capital. If no candidate is eligible, no new positions are opened during that fold; prior pending/residual risk remains managed and reported.
 
-The currently proposed window convention requires whole calendar windows. Weeks start Monday and months start on day one. Audited calendar coverage recognizes a holiday/weekend at the period start; an initial partial trading session cannot qualify as a full leading window. Partial leading/trailing periods are excluded. Legitimate earlier observations only warm up indicators and event state. Signal age counts observed valid bars; missing bars are not fabricated. Final baseline/selected accounts currently start separately at original capital; that state convention is explicitly pending canonical synchronization.
+The currently proposed window convention requires whole calendar windows. Weeks start Monday and months start on day one. Audited calendar coverage recognizes a holiday/weekend at the period start; an initial partial trading session cannot qualify as a full leading window. Partial leading/trailing periods are excluded. Legitimate earlier observations only warm up indicators and event state. Signal age counts observed valid bars; missing bars are not fabricated. Canonical v0.14 approves separate fresh initial-capital flat final accounts, with no inherited positions, orders, reservations or tax state. Final returns are not a continuation of the ordinary OOS ledger.
 
 SMA-seeded EMA and Wilder ADX are explicit implementation conventions. Equity is marked at observed Opens/Closes and scheduled events. Bar-end volume cannot determine an earlier Open fill. Open quotes remain execution proxies, with zero modeled spread/slippage and no guarantee of actual market liquidity.
 
@@ -62,4 +62,6 @@ python3 -m trendtrade101 export-dashboard --output .private/export/TrendTrade101
 
 The HTML export is self-contained, includes a capture timestamp and works without the Python server. It is a snapshot, not a continuously connected cloud dashboard. The CI workflow publishes this file as its `research-dashboard` artifact after tests pass. Raw vendor data is never included.
 
-Gross, after-fee and after-tax views reconcile costs on the same actual trade path. They are not independent reinvestment simulations. Trade counts mean complete aggregate position closures. Current residual positions, missing fills and sparse samples remain visible. A positive histogram hump whose preceding nonpositive boundary is unavailable is flagged without inventing its earlier peak. See [the v0.13 implementation audit and decision memo](technical-conventions-v013.md) for the exact remaining proposals and evidence requirements.
+Gross, after-fee and after-tax views reconcile costs on the same actual trade path. They are not independent reinvestment simulations. Trade counts mean complete aggregate position closures. Current residual positions, missing fills and sparse samples remain visible. A positive histogram hump whose preceding nonpositive boundary is unavailable is flagged without inventing its earlier peak. See [the implementation audit and decision memo](technical-conventions-v013.md) for the exact remaining proposals and evidence requirements.
+
+The [v0.14 accounting record](accounting-v014.md) describes executable units, per-run special-action gates and fresh/continuous account policies. The original/public provenance file retains the handoff-time synchronization status; current implementation evidence belongs in this record and the append-only decision log.

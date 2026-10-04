@@ -4,7 +4,7 @@ Auditable US and Japan trend-strategy research with a read-only progress console
 
 For continued work, start with [PROJECT_STATE.md](PROJECT_STATE.md), [AGENTS.md](AGENTS.md) and the [repository-local continuity skill](.agents/skills/maintain-project-context/SKILL.md). The state file is a short evidence index; recover actual Git/CI/data status before relying on it.
 
-**Current state:** the authorized public input derivatives are verified: 201 memberships, 127 unique securities and the approved PYPL substitution. Canonical configuration v0.13 has been read in full. Baseline, walk-forward and one-time holdout orchestration pass deterministic synthetic tests. Yahoo access is blocked by the cloud environment's network policy, and actual data audits remain unfinished. No historical baseline, optimization or final-holdout returns have been calculated.
+**Current state:** the authorized public input derivatives are verified: 201 memberships, 127 unique securities and the approved PYPL substitution. Canonical configuration v0.14 records historical executable split/share accounting, fresh training/final accounts and continuous ordinary OOS accounts. The implementation has synthetic regression coverage; remaining technical conventions and actual data audits still gate real execution. The latest parent-observed Yahoo preflight returned HTTP 429 despite effective hostname authorization; its limiting layer is unknown. No historical baseline, optimization or final-holdout returns have been calculated.
 
 ## Open the console
 
@@ -50,4 +50,4 @@ Frozen historical US baskets are user-fixed estimated subsets, not certified who
 
 See [architecture](docs/architecture.md), [execution definitions](docs/execution-definitions.md), [data and runs](docs/data-and-runs.md), [network access](docs/network-access.md) and [current blockers](docs/status.md).
 
-The [v0.13 implementation audit](docs/technical-conventions-v013.md) distinguishes approved strategy choices, narrow technical proposals, optional JP ADX sizing and data evidence still required before historical execution.
+The [v0.14 accounting synchronization](docs/accounting-v014.md) records the approved split/account policies and regression evidence. The [technical convention audit](docs/technical-conventions-v013.md) retains the remaining proposals, optional JP ADX sizing and data evidence still required before historical execution.

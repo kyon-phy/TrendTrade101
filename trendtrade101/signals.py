@@ -2,6 +2,7 @@
 from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass, replace
+from math import isfinite
 from .indicators import Reading, bullish_cross, positive_histogram
 
 ARMS = ("MA_ONLY", "MACD_HIST", "MA_ADX", "MACD_HIST_ADX", "FULL")
@@ -32,7 +33,7 @@ class SignalState:
         self.hump_boundary_seen = False
 
     def apply_split(self, ratio: float):
-        if ratio <= 0:
+        if not isfinite(ratio) or ratio <= 0:
             raise ValueError("Invalid split ratio")
         self.hist = deque((h/ratio if h is not None else None for h in self.hist),maxlen=self.increments+1)
         if self.peak is not None:

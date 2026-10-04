@@ -32,7 +32,8 @@ def result_catalog(root:Path):
             records.append({"run":folder.name,"market":plan["market"],"frequency":plan["frequency"],
                 "universe":plan["universe"],"arm":armfile.stem,"phase":r["phase"],
                 "metrics":r["metrics"],"equity":[{"time":p["time"],"equity":p["equity"]} for p in r["equity"]],
-                "progress":progress.get("stage"),"configuration_version":r["configuration_version"]})
+                "progress":progress.get("stage"),"configuration_version":r["configuration_version"],
+                "account_initialization":r.get("account_initialization")})
         for armfolder in sorted((folder/"walk_forward").glob("*")):
             summary=read_json(armfolder/"summary.json")
             if not summary:continue
@@ -40,7 +41,8 @@ def result_catalog(root:Path):
                 "universe":plan["universe"],"arm":armfolder.name,"phase":"ordinary_out_of_sample",
                 "metrics":summary["metrics"],"folds":summary["folds"],
                 "equity":[{"time":p["time"],"equity":p["equity"]} for p in summary["equity"]],
-                "progress":progress.get("stage"),"configuration_version":plan["configuration_version"]})
+                "progress":progress.get("stage"),"configuration_version":plan["configuration_version"],
+                "account_initialization":"continuous"})
         if progress.get("stage")=="holdout_complete":
             for armfile in sorted((folder/"final_holdout").glob("*.json")):
                 pair=read_json(armfile)
@@ -49,7 +51,8 @@ def result_catalog(root:Path):
                     records.append({"run":folder.name,"market":plan["market"],"frequency":plan["frequency"],
                         "universe":plan["universe"],"arm":armfile.stem,"phase":"final_holdout_"+label,
                         "metrics":r["metrics"],"equity":[{"time":p["time"],"equity":p["equity"]} for p in r["equity"]],
-                        "configuration_version":r["configuration_version"]})
+                        "configuration_version":r["configuration_version"],
+                        "account_initialization":r.get("account_initialization")})
     return records
 
 def export_dashboard(root:Path,destination:Path):

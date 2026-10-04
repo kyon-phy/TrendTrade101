@@ -22,6 +22,11 @@ class Position:
     gross_cost: float = 0
     first_fill: datetime | None = None
 
+    @property
+    def average_cost(self) -> float | None:
+        """Fee-inclusive cost per currently held historical share."""
+        return self.cost/self.quantity if self.quantity else None
+
 @dataclass
 class Order:
     event_id: str
@@ -82,6 +87,7 @@ class Ledger:
         if not isfinite(ratio) or ratio <= 0:
             raise ValueError("Invalid split ratio")
         position = self.positions.get(ticker)
+        quantity_before=position.quantity if position else 0
         held=position.quantity*ratio if position else 0
         if abs(held-round(held))>1e-8:
             raise ValueError("Fractional split entitlements require an audited cash-in-lieu model")
@@ -101,7 +107,10 @@ class Ledger:
                           split_ratio=ratio)
         if ticker in self.marks:
             self.marks[ticker]/=ratio
-        self.events.append({"status":"split","ticker":ticker,"ratio":ratio,"time":at.isoformat()})
+        self.events.append({"status":"split","ticker":ticker,"ratio":ratio,"time":at.isoformat(),
+                            "quantity_before":quantity_before,"quantity_after":position.quantity if position else 0,
+                            "total_cost":position.cost if position else 0,
+                            "average_cost_after":position.average_cost if position else None})
 
     def _log(self, order, status, at, **details):
         self.events.append({"event_id":order.event_id, "ticker":order.ticker,

@@ -224,3 +224,72 @@ This incremental log begins with checked repository evidence and the current nar
   "supersedes": null
 }
 ```
+
+## D013
+
+```json
+{
+  "id": "D013",
+  "recorded_at": "2026-10-04T06:55:27+00:00",
+  "domain": "strategy",
+  "status": "approved",
+  "summary": "Canonical v0.14 records the explicit approval of historical executable split/share units and a pause for unverified special actions in affected runs; fresh training candidate accounts, continuous ordinary OOS accounts and separate fresh final baseline/selected accounts. Only split_lot_basis, fold_account_state and final_account_state changed approval status. No membership, execution/scoring or other technical proposal changed.",
+  "approved_fields": [
+    "split_lot_basis",
+    "fold_account_state",
+    "final_account_state"
+  ],
+  "evidence": [
+    "config/inputs/TrendTrade101_Backtest_Configuration.md",
+    "config/inputs/public_input_provenance.json",
+    "docs/accounting-v014.md"
+  ],
+  "pending_fields": [],
+  "supersedes": null
+}
+```
+
+## D014
+
+```json
+{
+  "id": "D014",
+  "recorded_at": "2026-10-04T06:55:27+00:00",
+  "domain": "strategy",
+  "status": "proposed",
+  "summary": "The remaining technical bundle retains pending indicator initialization, valid-bar gap/startup handling, valuation/reporting cadence and partial-window treatment. D013 resolves only the split/account subset of D002. Synthetic implementation and verification do not approve the remaining conventions.",
+  "evidence": [
+    "docs/technical-conventions-v013.md",
+    "config/baseline.json"
+  ],
+  "pending_fields": [
+    "indicator_initialization",
+    "signal_gap_policy",
+    "valuation_cadence",
+    "partial_window_policy"
+  ],
+  "supersedes": "D002"
+}
+```
+
+## D015
+
+```json
+{
+  "id": "D015",
+  "recorded_at": "2026-10-04T06:55:27+00:00",
+  "domain": "software",
+  "status": "implemented",
+  "summary": "Machine configuration and input pins are reconciled to the verified v0.14 public projection. Frozen plans validate/store account and split policies; affected special-action runs stop before replay without deleting members, while unaffected baskets retain the unresolved-event record. Split audit logs preserve aggregate cost and expose per-share cost. Added synthetic regressions for split equivalence, state validation, per-run action scope, independent training, carried OOS positions/orders/tax and separate warmed final accounts. Real execution remains locked.",
+  "evidence": [
+    "docs/accounting-v014.md",
+    "config/baseline.json",
+    "tests/test_approved_accounting.py",
+    "trendtrade101/orchestration.py",
+    "trendtrade101/dataset.py",
+    "trendtrade101/portfolio.py"
+  ],
+  "pending_fields": [],
+  "supersedes": null
+}
+```

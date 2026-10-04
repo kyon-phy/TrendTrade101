@@ -48,7 +48,7 @@ def status(root: Path) -> dict:
                    if inputs["status"]=="verified" else "; ".join(inputs["problems"])},
         {"id":"canonical_sync","name":"Configuration synchronization",
          "status":"complete" if config.get("canonical_definitions_synchronized") and config.get("source_sha256")==EXPECTED["TrendTrade101_Backtest_Configuration.md"] else "blocked",
-         "detail":"Accepted v0.13 execution/scoring definitions reconciled; remaining technical conventions are listed below."},
+         "detail":"Approved v0.14 split and account-state definitions reconciled; remaining technical conventions and data checks are listed below."},
         {"id":"data_audit","name":"Market data audit","status":data_status,"detail":data_detail},
         {"id":"holdout_freeze","name":"Holdout reservation","status":"not_started",
          "detail":"Last complete week/month policy retained; exact audited dates pending."},

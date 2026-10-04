@@ -9,7 +9,7 @@ from math import prod
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from .audit import audit_chart
-from .dataset import REQUIRED_AUDITS,load_dataset
+from .dataset import REQUIRED_AUDITS,load_dataset,unresolved_action_symbols
 from .inputs import EXPECTED,project_members
 from .storage import read_json,sha256,write_json,utcnow
 from .timing import Session
@@ -20,8 +20,7 @@ def audit_local_charts(root:Path,capture_path:Path,output:Path):
     review=capture.get("review",{})
     if any(review.get(k,{}).get("status")!="verified" or not review[k].get("evidence") for k in REQUIRED_AUDITS):
         raise ValueError("Supply completed, evidence-backed audits; booleans alone are insufficient")
-    if capture.get("unresolved_corporate_actions"):
-        raise ValueError("Corporate distributions must be resolved before producing a runnable package")
+    unresolved_action_symbols(capture)
     market,frequency=capture["market"],capture["frequency"]
     tz=ZoneInfo(capture["timezone"])
     as_of=datetime.fromisoformat(capture["as_of"])
@@ -140,9 +139,12 @@ def audit_local_charts(root:Path,capture_path:Path,output:Path):
         "bars_file":"bars.json","bars_sha256":sha256(output/"bars.json"),
         "opens_file":"opens.json","opens_sha256":sha256(output/"opens.json"),
         "source_snapshots":raw_sources,"splits":splits,"audit":review,
-        "unresolved_corporate_actions":[],"per_symbol_audit":audits,"audited_at":utcnow()}
+        "unresolved_corporate_actions":capture.get("unresolved_corporate_actions",[]),
+        "per_symbol_audit":audits,"audited_at":utcnow()}
     write_json(output/"dataset.json",manifest)
     validated=load_dataset(root,output/"dataset.json")
     return {"dataset":str(output/"dataset.json"),"members":len(members),"usable_bars":len(bars),
             "dataset_digest":validated.digest,
-            "complete_periods":len(period_ends),"status":"audited_local_package"}
+            "complete_periods":len(period_ends),"status":"audited_local_package",
+            "unresolved_action_symbols":sorted(unresolved_action_symbols(manifest)),
+            "execution_note":"Packages retain all members; unresolved actions block every affected run before replay."}
