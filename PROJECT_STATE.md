@@ -5,14 +5,14 @@ This is a concise evidence index, not the strategy authority or a claim that the
 ```json
 {
   "schema_version": 1,
-  "recorded_at": "2026-10-04T06:55:27+00:00",
+  "recorded_at": "2026-10-04T07:02:11.496914+00:00",
   "verified_checkpoint": {
-    "commit": "f225b0772e20c6b30ee499ecae04770d61369b8e",
-    "tests_passed": 100,
+    "commit": "c1be2216a79bc7127b61c0243ef375181e61a321",
+    "tests_passed": 109,
     "test_scope": "synthetic_software",
-    "ci_url": "https://github.com/kyon-phy/TrendTrade101/actions/runs/37182846961",
+    "ci_url": "https://github.com/kyon-phy/TrendTrade101/actions/runs/37184472204",
     "artifact_name": "research-dashboard",
-    "artifact_sha256": "5e5cf6ec8645caf46c553a678aef9392124b357092f327736a8d465b4e09a024"
+    "artifact_sha256": "3075bb530ff62989b0790e673fe465cec59bb4b7369df5f8808281a11bd47d39"
   },
   "configuration": {
     "version": "v0.14",
@@ -72,6 +72,6 @@ This is a concise evidence index, not the strategy authority or a claim that the
 - [Approved-rule public projection](config/inputs/TrendTrade101_Backtest_Configuration.md) and [original/public provenance](config/inputs/public_input_provenance.json).
 - [Approved v0.14 accounting synchronization](docs/accounting-v014.md).
 - [Remaining technical conventions and JP alternative](docs/technical-conventions-v013.md), [network blocker](docs/network-access.md), and [data/run contract](docs/data-and-runs.md).
-- [Checkpoint CI and downloadable dashboard](https://github.com/kyon-phy/TrendTrade101/actions/runs/37182846961). HTML is a timestamped snapshot; no public live URL is verified. Local port availability must be checked after environment restarts.
+- [Checkpoint CI and downloadable dashboard](https://github.com/kyon-phy/TrendTrade101/actions/runs/37184472204). HTML is a timestamped snapshot; no public live URL is verified. Local port availability must be checked after environment restarts.
 
 No historical baseline, optimization or final-holdout result is claimed. The original input bytes were not verified here; the public derivatives were. No stock reselection is authorized.

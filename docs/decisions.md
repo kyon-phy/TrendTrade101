@@ -293,3 +293,23 @@ This incremental log begins with checked repository evidence and the current nar
   "supersedes": null
 }
 ```
+
+## D016
+
+```json
+{
+  "id": "D016",
+  "recorded_at": "2026-10-04T07:02:11.496914+00:00",
+  "domain": "software",
+  "status": "verified",
+  "summary": "Implementation commit c1be2216a79bc7127b61c0243ef375181e61a321 synchronized the three approved v0.14 accounting fields and passed 109 software tests, including nine focused accounting regressions. Its exact-head CI succeeded and an unexpired research-dashboard artifact was observed. Public input hashes and all 201 memberships verified; original source bytes were not independently materialized here. Real research remains unexecuted and locked.",
+  "verification_scope": "synthetic_software",
+  "evidence": [
+    "https://github.com/kyon-phy/TrendTrade101/actions/runs/37184472204",
+    "docs/accounting-v014.md",
+    "tests/test_approved_accounting.py"
+  ],
+  "pending_fields": [],
+  "supersedes": "D008"
+}
+```
