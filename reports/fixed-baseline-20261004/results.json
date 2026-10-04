@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "study_id": "original25_daily_full_fixed_20241101_20260901",
+    "result_classification": "assumption_based_hypothetical_simulation",
+    "universe": "existing_25",
+    "frequency": "daily",
+    "signal_arm": "FULL",
+    "allocation": "fixed_initial_capital_1_over_15",
+    "scored_start_inclusive": "2024-11-01",
+    "scored_end_exclusive": "2026-09-01",
+    "warmup": "Available observations before 2024-11-01 warm indicators only; no prestart trades, positions or P&L",
+    "late_ipo": "Use actual post-listing cached observations and causal indicator readiness; no common extra burn-in filter",
+    "markets_independent": true,
+    "initial_account": "fresh_initial_capital_flat",
+    "retained_minute_delay_parameter": 20,
+    "minute_delay_applied_to_daily": false,
+    "optimization": false,
+    "formal_holdout_evaluated": false,
+    "protected_prices_from": "2026-09-01",
+    "period_return_is_annualized": false
+  },
+  "canonical_configuration_version": "v0.16",
+  "assumptions": {
+    "vendor_ohlc_basis": "assumed_split_adjusted_only_through_original_retrieval",
+    "split_records": "assumed_sufficient_for_this_hypothetical_simulation",
+    "other_actions": "no_unrecorded_special_action_modeled; known_unsupported_events_still_block",
+    "identity": "cached_symbol_identity_retained; no_members_removed",
+    "units": {
+      "US": 1,
+      "JP": 100
+    },
+    "dividend_cash": "excluded_under_existing_approved_price_only_policy",
+    "indicator_initialization": "sma_seeded_ema_wilder_adx",
+    "signal_gap_policy": "observed_valid_bars_no_fill",
+    "valuation_cadence": "observed_open_close_and_scheduled_events",
+    "partial_window_policy": "whole_calendar_months_prior_history_warmup_only",
+    "authorization_status": "explicitly_approved_hypothetical_only",
+    "data_audit_status": "not_independently_verified"
+  },
+  "markets": {
+    "US": {
+      "currency": "USD",
+      "metrics": {
+        "initial_equity": 100000,
+        "final_equity": 96016.42812347412,
+        "after_tax_return": -0.03983571876525882,
+        "after_fee_return": -0.03983571876525882,
+        "gross_return": -0.03411571876525876,
+        "max_drawdown": 0.04194792627862801,
+        "closed_trades": 13,
+        "fees": 572.0,
+        "taxes": 0.0,
+        "sparse": false,
+        "win_rate": 0.15384615384615385,
+        "average_trade_after_fee_return": -0.04708657221264956,
+        "average_holding_seconds": 691200.0,
+        "calendar_time_weighted_capital_utilization": 0.010262206484100356,
+        "maximum_capital_utilization": 0.1423078999702903,
+        "maximum_single_position_equity_share": 0.07370218560426428,
+        "maximum_position_hhi": 1.0,
+        "orders_with_missing_price": 0,
+        "orders_unfilled_at_segment_end": 0,
+        "below_lot_orders": 0,
+        "cash_shortfall_orders": 0,
+        "position_cap_shortfall_orders": 0,
+        "canceled_orders": 1,
+        "unsuccessful_scheduled_liquidations": 0,
+        "exit_reason_counts": {
+          "histogram_drawdown": 12,
+          "scheduled_monthly_flatten": 1
+        },
+        "zero_volume_observations": 0,
+        "positive_hump_without_known_boundary_bars": 42,
+        "undefined_histogram_bars": 132
+      },
+      "ending_cash": 96016.42812347412,
+      "ending_exposure": 0,
+      "residual_positions": {},
+      "tax_by_calendar_year": {
+        "2024": 0.0,
+        "2025": 0.0,
+        "2026": 0.0
+      },
+      "realized_after_fee_pnl_by_year": {
+        "2024": -221.81985473632812,
+        "2025": -2924.081367492676,
+        "2026": -837.670654296875
+      }
+    },
+    "JP": {
+      "currency": "JPY",
+      "metrics": {
+        "initial_equity": 16000000,
+        "final_equity": 16125982.888772275,
+        "after_tax_return": 0.007873930548267127,
+        "after_fee_return": 0.012618753433227381,
+        "gross_return": 0.012618753433227381,
+        "max_drawdown": 0.018977690920013043,
+        "closed_trades": 10,
+        "fees": 0.0,
+        "taxes": 75917.1661593628,
+        "sparse": false,
+        "win_rate": 0.6,
+        "average_trade_after_fee_return": 0.01723596410975043,
+        "average_holding_seconds": 483840.0,
+        "calendar_time_weighted_capital_utilization": 0.004559906596240856,
+        "maximum_capital_utilization": 0.08685178520699491,
+        "maximum_single_position_equity_share": 0.08685178520699491,
+        "maximum_position_hhi": 1.0,
+        "orders_with_missing_price": 0,
+        "orders_unfilled_at_segment_end": 0,
+        "below_lot_orders": 13,
+        "cash_shortfall_orders": 0,
+        "position_cap_shortfall_orders": 0,
+        "canceled_orders": 0,
+        "unsuccessful_scheduled_liquidations": 0,
+        "exit_reason_counts": {
+          "histogram_drawdown": 6,
+          "scheduled_monthly_flatten": 4
+        },
+        "zero_volume_observations": 0,
+        "positive_hump_without_known_boundary_bars": 21,
+        "undefined_histogram_bars": 177
+      },
+      "ending_cash": 16125982.888772275,
+      "ending_exposure": 0,
+      "residual_positions": {},
+      "tax_by_calendar_year": {
+        "2024": 0.0,
+        "2025": 58913.511159362795,
+        "2026": 17003.655
+      },
+      "realized_after_fee_pnl_by_year": {
+        "2024": -171800.0,
+        "2025": 290000.0549316406,
+        "2026": 83700.0
+      }
+    }
+  },
+  "limitations": [
+    "Assumption-based exploratory simulation; vendor basis and action completeness are not independently verified.",
+    "Fill eligibility does not use eventual bar volume; Open quotes are execution proxies.",
+    "Gross/fee views reconcile costs on the same realized trade path; they are not separate reinvestment simulations.",
+    "Retrospective universe selection and survivorship bias.",
+    "Minute memberships use later July/August selection information on potentially earlier July prices.",
+    "US historical baskets are fixed estimated subsets, not certified full-market Top30.",
+    "Zero spread/slippage, excluded dividends/FX, conditional JP zero fees and simplified tax.",
+    "Vendor coverage, auctions, actions, IPO gaps and historical lot units require audit.",
+    "Final baseline and selected accounts restart separately; final results do not continue the ordinary OOS ledger.",
+    "Unverified special corporate actions pause affected runs without removing frozen members.",
+    "Cached OHLC split-only basis and split completeness are approved hypotheses, not verified source facts.",
+    "US whole-share and JP 100-share lots are simulation assumptions; issuer continuity is retained from cached labels.",
+    "September 2026 and later prices excluded; later split factors are used only to reverse vendor snapshot normalization.",
+    "Short-history retrospective original25 basket; no parameter search, formal validation, dividend income or FX conversion.",
+    "No common arbitrary burn-in gate: each indicator becomes available causally; Kioxia participates only after listing and readiness."
+  ]
+}

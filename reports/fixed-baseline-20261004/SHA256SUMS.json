@@ -1,0 +1,44 @@
+[
+  {
+    "file": "README.md",
+    "size_bytes": 8288,
+    "sha256": "e429b309e40dc2aa721fdb159f6a76b2bc57ce1f6043863b73c822992c408dc5",
+    "git_blob_sha1": "39f0615263e78b6c0531edf1476da0847b01bfa6"
+  },
+  {
+    "file": "runtime_config.json",
+    "size_bytes": 24325,
+    "sha256": "34564eb58d3374a2ea2bb35491164373446d4abb4c1ede16fba4f245bb879759",
+    "git_blob_sha1": "06f711bd030a67e49d3a4115eab655a89324f6c4"
+  },
+  {
+    "file": "results.json",
+    "size_bytes": 6991,
+    "sha256": "53ccf5c2459cabf16e1ee381b7e51c41f51f894cb88b93532b11c4cbe67b9c6a",
+    "git_blob_sha1": "e0d876ddd15426689d328116abfd5f36e8633c7b"
+  },
+  {
+    "file": "completed_trades.csv",
+    "size_bytes": 4473,
+    "sha256": "c83fbff2b2f3c36fc95d363589a6922b176f23ac1ae4e323fafb48aafaee9d0f",
+    "git_blob_sha1": "f0be914ca246b67fecdf2e48fc53e9dc99938318"
+  },
+  {
+    "file": "monthly_account_summary.csv",
+    "size_bytes": 3854,
+    "sha256": "4471b41fefd1cb6bfb1605637ef462426bee0d59b7137fd89981564615cb2a03",
+    "git_blob_sha1": "85e5051265c07a790c81ab4c94b02ad7614346c0"
+  },
+  {
+    "file": "account_equity.png",
+    "size_bytes": 47598,
+    "sha256": "fbfc5b8304f0d705f741497f165f475abfbf1765745b6fa92a57814f8ccd5c6c",
+    "git_blob_sha1": "654f3a4adec6327e4093c54aa4d3b9bf8b034c80"
+  },
+  {
+    "file": "Fixed_Baseline_Report.pdf",
+    "size_bytes": 127683,
+    "sha256": "614547440c6e3279489e01980d4a3d069cc733b0ff83c4cfd0b2d0ab0ae59968",
+    "git_blob_sha1": "cef7c4b17d47cd4a03ba3201fbc5645d34aa1b7a"
+  }
+]

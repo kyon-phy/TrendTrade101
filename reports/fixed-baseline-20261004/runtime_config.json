@@ -1,0 +1,681 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "study_id": "original25_daily_full_fixed_20241101_20260901",
+    "result_classification": "assumption_based_hypothetical_simulation",
+    "universe": "existing_25",
+    "frequency": "daily",
+    "signal_arm": "FULL",
+    "allocation": "fixed_initial_capital_1_over_15",
+    "scored_start_inclusive": "2024-11-01",
+    "scored_end_exclusive": "2026-09-01",
+    "warmup": "Available observations before 2024-11-01 warm indicators only; no prestart trades, positions or P&L",
+    "late_ipo": "Use actual post-listing cached observations and causal indicator readiness; no common extra burn-in filter",
+    "markets_independent": true,
+    "initial_account": "fresh_initial_capital_flat",
+    "retained_minute_delay_parameter": 20,
+    "minute_delay_applied_to_daily": false,
+    "optimization": false,
+    "formal_holdout_evaluated": false,
+    "protected_prices_from": "2026-09-01",
+    "period_return_is_annualized": false,
+    "inactive_retained_settings": [
+      "minute delay20",
+      "minute entry cutoff63",
+      "minute liquidation scheduling",
+      "ADX-scaled allocation bases",
+      "training/OOS/final phase policies other than the actual fresh pilot account start"
+    ]
+  },
+  "parameters": {
+    "markets": {
+      "US": {
+        "currency": "USD",
+        "capital": 100000,
+        "position_cap": 100000,
+        "base": 10000,
+        "lot": 1,
+        "fee_rate": 0.00495,
+        "fee_cap": 22,
+        "fixed_order_target": 6666.666666666667,
+        "fixed_order_target_formula": "initial_capital / 15"
+      },
+      "JP": {
+        "currency": "JPY",
+        "capital": 16000000,
+        "position_cap": 16000000,
+        "base": null,
+        "lot": 100,
+        "fee_rate": 0,
+        "fee_cap": 0,
+        "fixed_order_target": 1066666.6666666667,
+        "fixed_order_target_formula": "initial_capital / 15"
+      }
+    },
+    "indicators": {
+      "sma_fast": 5,
+      "sma_slow": 20,
+      "macd_fast": 12,
+      "macd_slow": 26,
+      "macd_signal": 9,
+      "adx_period": 14,
+      "adx_threshold": 25,
+      "cross_window": 5,
+      "hist_increments": 3,
+      "hist_drawdown": 0.4
+    },
+    "execution": {
+      "delay_minutes": 20,
+      "entry_cutoff_minutes": 63,
+      "fixed_fraction": 0.06666666666666667,
+      "position_scale": 1,
+      "spread_bps": 0,
+      "slippage_bps": 0,
+      "annual_tax_rate": 0.20315,
+      "price_stop": {
+        "enabled": false,
+        "threshold": null
+      },
+      "price_target": {
+        "enabled": false,
+        "threshold": null
+      },
+      "reservation_basis": "signal_target_plus_estimated_fee",
+      "priority_tie_break": [
+        "ticker",
+        "event_id"
+      ],
+      "minute_flatten": "last_calendar_continuous_bar_open",
+      "daily_flatten": "last_trading_day_open",
+      "daily_month_end_buy_ban": true
+    },
+    "signal_rules": {
+      "window_includes_current": true,
+      "deduplicate_cross_pair": true,
+      "evaluate_exit_before_zero_reset": true,
+      "require_histogram_decline": true,
+      "exit_includes_equality": true
+    },
+    "ledger_policy": {
+      "cap_basis": "market_value",
+      "shrink_only": true,
+      "tax_timing": "realization_accrual",
+      "cross_year_loss_carry": false
+    },
+    "account_state": {
+      "training": "fresh_initial_flat",
+      "ordinary_oos": "continuous",
+      "final_baseline": "fresh_initial_flat",
+      "final_selected": "fresh_initial_flat",
+      "fresh_account_history": "indicator_warmup_only"
+    },
+    "corporate_actions": {
+      "price_quantity_basis": "historical_unadjusted_split_events",
+      "split_quantity": "multiply_ratio",
+      "split_cost_per_share": "divide_ratio",
+      "split_total_cost": "preserve",
+      "split_indicators": "rescale_price_dimensional_state_at_effective_time",
+      "unverified_special_actions": "block_affected_run"
+    }
+  },
+  "technical_conventions": {
+    "sma_input": "completed Close",
+    "ema_input": "completed Close",
+    "histogram_scale": "MACD minus Signal, not 2H",
+    "ema_initialization": "SMA of first N valid observations; then alpha=2/(N+1)",
+    "adx_initialization": "Wilder means over 14 transitions, then 14 DX observations; first ADX at observation28",
+    "first_histogram_observation": 34,
+    "histogram_entry_rule": "Three strictly positive increments over four defined H values; final H > 0",
+    "cross_rule": "Previous fast <= slow and current fast > slow; both crosses in inclusive last5 completed valid bars; each distinct pair once",
+    "exit_rule": "Current positive-hump peak; declining H <= 60% of peak or nonpositive H; evaluate exit before reset",
+    "signal_gap_policy": "Observed valid completed bars only, no fabricated fills or bars",
+    "slope_pct": "100 * (SMA5[t] / SMA5[t-1] - 1)",
+    "ordinary_fill": "Next observed tradable session Open strictly after completed signal bar",
+    "scheduled_fill": "Calendar-planned last trading day Open of each month; full-day buy ban",
+    "valuation": "Observed Open, completed Close and scheduled events in causal order; missing marks retain last-known mark and remain flagged",
+    "tax": "20.315% current-calendar-year positive realized after-fee profit; loss realization can refund current-year accrual; no cross-year loss carry",
+    "cash_reservation": "Signal-time target plus estimated fee; quantity can shrink at fill but cannot grow",
+    "priority": "Sells before buys; buys by descending signal-time SMA5 slope, then ticker, then event ID",
+    "gross_fee_views": "Reconcile costs on the same after-tax trade path; not separate reinvestment simulations",
+    "rounding": "Whole assumed units; fees/taxes/equity calculated in floating point without additional unapproved currency rounding",
+    "full_entry_conjunction": "SMA5/SMA20 bullish cross AND MACD/signal bullish cross in the inclusive N5 window AND ADX14 strictly >25 AND three strictly positive histogram increments over four values ending H>0; distinct cross pair deduplicated. SMA slope ranks competing buys but is not an entry filter."
+  },
+  "assumptions": {
+    "vendor_ohlc_basis": "assumed_split_adjusted_only_through_original_retrieval",
+    "split_records": "assumed_sufficient_for_this_hypothetical_simulation",
+    "other_actions": "no_unrecorded_special_action_modeled; known_unsupported_events_still_block",
+    "identity": "cached_symbol_identity_retained; no_members_removed",
+    "units": {
+      "US": 1,
+      "JP": 100
+    },
+    "dividend_cash": "excluded_under_existing_approved_price_only_policy",
+    "indicator_initialization": "sma_seeded_ema_wilder_adx",
+    "signal_gap_policy": "observed_valid_bars_no_fill",
+    "valuation_cadence": "observed_open_close_and_scheduled_events",
+    "partial_window_policy": "whole_calendar_months_prior_history_warmup_only",
+    "authorization_status": "explicitly_approved_hypothetical_only",
+    "data_audit_status": "not_independently_verified"
+  },
+  "members": {
+    "US": [
+      "NVDA",
+      "AVGO",
+      "AMD",
+      "MU",
+      "TSM",
+      "ASML",
+      "LRCX",
+      "ANET",
+      "VRT",
+      "MSFT",
+      "GOOGL",
+      "ORCL"
+    ],
+    "JP": [
+      "6857.T",
+      "8035.T",
+      "6146.T",
+      "6920.T",
+      "285A.T",
+      "4062.T",
+      "4004.T",
+      "4186.T",
+      "4063.T",
+      "5803.T",
+      "5801.T",
+      "9984.T",
+      "2737.T"
+    ]
+  },
+  "coverage": {
+    "US": {
+      "NVDA": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "1999-01-22",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "AVGO": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "2009-08-06",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "AMD": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "1980-03-17",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "MU": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "1984-06-01",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "TSM": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "1997-10-09",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "ASML": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "1995-03-15",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "LRCX": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "1984-05-04",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "ANET": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "2014-06-06",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "VRT": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "2018-08-02",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "MSFT": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "1986-03-13",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "GOOGL": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "2004-08-19",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      },
+      "ORCL": {
+        "cached_rows": 501,
+        "used_rows": 479,
+        "excluded_rows": 22,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 22,
+        "issuer_first_date_used": "1986-03-12",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 1,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 479,
+          "usable": 479,
+          "usable_opens": 479
+        }
+      }
+    },
+    "JP": {
+      "6857.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2000-01-04",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "8035.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2000-01-04",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "6146.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2001-01-01",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "6920.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2010-02-22",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "285A.T": {
+        "cached_rows": 434,
+        "used_rows": 413,
+        "excluded_rows": 21,
+        "first_observed": "2024-12-18",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 0,
+        "issuer_first_date_used": "2024-12-18",
+        "issuer_date_basis": "official_Kioxia_listing",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 413,
+          "usable": 413,
+          "usable_opens": 413
+        }
+      },
+      "4062.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2001-01-01",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "4004.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2000-01-04",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "4186.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2001-01-01",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "4063.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2000-01-04",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "5803.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2000-01-04",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "5801.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2000-01-04",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "9984.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2000-01-04",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      },
+      "2737.T": {
+        "cached_rows": 487,
+        "used_rows": 466,
+        "excluded_rows": 21,
+        "first_observed": "2024-10-02",
+        "last_used": "2026-08-31",
+        "prestart_warmup_rows": 21,
+        "issuer_first_date_used": "2004-03-25",
+        "issuer_date_basis": "provider_metadata_not_independently_certified",
+        "lot": 100,
+        "lot_status": "approved_simulation_assumption",
+        "mechanical_counts": {
+          "missing_expected_intervals": 0,
+          "returned": 466,
+          "usable": 466,
+          "usable_opens": 466
+        }
+      }
+    }
+  },
+  "provenance": {
+    "canonical_configuration_version": "v0.16",
+    "canonical_source_sha256": "b727826e136611f31822915375903c88967243e43e791cb5c52d89c613f8fe6b",
+    "public_configuration_commit": "b461860216e3fccb2cc28ddf584b3f4bebf0f2a8",
+    "public_configuration_sha256": "326b068299d0ce53a5fd350c2c3c4a98cfaa50d192fa0c963efcef03a5f403db",
+    "base_implementation_commit": "5d429ec1f4478b1dd7c6895df75ae546020b64c2",
+    "implementation_state": "Exact base snapshot plus reviewed hypothesis-mode changes; execution used local modified source, not a claimed final Git commit",
+    "modified_file_sha256": {
+      "trendtrade101/engine.py": "7cbb14f57e75c6f38c463fcb1332a662b066fb9fc9519cd4c7f90b0c7849134f",
+      "trendtrade101/hypothetical_pilot.py": "cce9a104a9d65d1b9477ca59c4f31699ad904b25c7c2f4db6662878dd2c44bce",
+      "tests/test_hypothetical_pilot.py": "ecfacbe1284e2ca761d3e913aacb307b756908bb0f3cf2dc3035e9ce4cdaa00f"
+    },
+    "original_input_zip_sha256": "68e795b24de5f6d0f3f32caa960c026f32b3d8a8389d68f9c77a615904f1d638",
+    "raw_inventory_sha256": "8f5974a56041c0f734bf7b57fe3714aca79fe38b612c849cb79ef34139e6a9b7",
+    "inherited_parameter_snapshot_version": "v0.15",
+    "inherited_parameter_snapshot_digest": "204092aaf6ece2ec43a2dc9e3b2b1505794242c8c05a9310654333cdc154893f",
+    "unchanged_rules": "Canonical v0.16 Sections3 through13 are byte-identical to v0.15; v0.16 supplies explicit hypothesis authorization",
+    "market_assumption_digests": {
+      "US": "28d117352715186b399e6241f3579581953946c41d432a829e0b3872c1091095",
+      "JP": "4f8f208845e350a550684fb72d64cfde7f2798871847df397477ba895b72552d"
+    },
+    "normalization_digests": {
+      "US": "88724dbd1f43c754178a2c9f685dd6dc34fb94809e411f502faa31c52d4702ba",
+      "JP": "60f9f07c121ac3dc690f546f6d54e97a4482ba8767651e55a74c3ad8ece18d73"
+    }
+  },
+  "verification": {
+    "tests_passed": 130,
+    "pinned_plain_text_review": "cleared after two split-input guards were strengthened",
+    "independent_result_reconciliation": "passed",
+    "reviewed_replay": "all preliminary account events and metrics reproduced exactly",
+    "original_input_reviews": "pending statuses preserved; no assumption promoted to verified",
+    "raw_data_publication": false
+  }
+}
