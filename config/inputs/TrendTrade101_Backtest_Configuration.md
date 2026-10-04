@@ -1,13 +1,13 @@
 # TrendTrade101 Backtest Configuration
 
-Version: v0.15  
-Publication: sanitized public projection; strategy definitions and membership match canonical v0.15  
-Source configuration SHA256: 0d0c647363ae61fd3287ad4f6ac922a12510e2945358b6d3ff17158f460be1c0  
+Version: v0.16  
+Publication: sanitized public projection; strategy definitions and membership match canonical v0.16  
+Source configuration SHA256: b727826e136611f31822915375903c88967243e43e791cb5c52d89c613f8fe6b  
 Updated: 2026-10-04 JST  
 Project: TrendTrade101  
-Status: Memberships are frozen to the delivered review snapshot with one approved US daily exception: PYPL replaces NKE. The formal research plan is retained. A separate original25 cached-daily baseline pilot is now approved, conditional on the applicable data/action audit and holdout isolation. The pilot is not yet verified as executed; this update supplies no historical return result.
+Status: Memberships are frozen to the delivered review snapshot with one approved US daily exception: PYPL replaces NKE. The formal research plan is retained. A separate assumption-based original25 daily FULL baseline simulation is approved for the fixed pre-holdout interval below. Its named economic inputs remain assumptions rather than verified source facts. This update records permission and scope, not completed simulation results.
 
-This public project configuration is derived from the authoritative v0.15 configuration record for the US and Japan historical trend-backtest project. Publication provenance and original-versus-public file hashes are recorded in public_input_provenance.json. It records selected parameters, execution assumptions, experiment design, unresolved definitions, evidence and biases. Every strategy, universe, data, cost or parameter change must update this record and its version history.
+This public project configuration is derived from the authoritative v0.16 configuration record for the US and Japan historical trend-backtest project. Publication provenance and original-versus-public file hashes are recorded in public_input_provenance.json. It records selected parameters, execution assumptions, experiment design, unresolved definitions, evidence and biases. Every strategy, universe, data, cost or parameter change must update this record and its version history.
 
 Project documents, configuration, UI, code comments and commit messages use English. This document contains no return results and does not claim that an engine, live monitor or trading system has been deployed.
 
@@ -35,7 +35,7 @@ An adjustable field is not automatically an optimization axis. Only the document
 5. All 201 membership rows remain frozen, including the approved US daily NKE-to-PYPL replacement. Full-US historical Top30 certification is incomplete and is not a prerequisite for the selected fixed-basket study. Preserve actual coverage, selection-date and look-ahead-bias disclosures.
 6. Historical executable prices/share units, effective-date split adjustments and the training/OOS/final account-state policies are now approved. Affected real runs must pause for unverified special corporate actions; implementation synchronization and focused verification remain pending.
 7. Five fixed-amount entry comparisons are selected for formal research. A fully crossed ADX-weighted experiment remains optional and must disclose its additional selection effects.
-8. The separate cached-daily original25 pilot is baseline-only. Its exact eligible interval, audit evidence and separation from the formal holdout must be frozen before execution; the reported cache bounds do not establish tradeable coverage.
+8. The original25 pilot now has a separate assumption-based authorization for [2024-11-01, 2026-09-01), with earlier October2024 warmup and late-IPO/readiness constraints. The named assumptions permit this qualified simulation despite incomplete external economic verification; formal verified-data readiness remains unchanged. Mechanical validity, exact input hashes, causal boundaries and clear result labels are still required.
 
 ## 2 Data and market configuration
 
@@ -91,42 +91,65 @@ Advantest has765 null Close entries in this summary; their cause has not been cl
 
 The subsequent 21:57 JST instruction freezes the previously delivered members and cancels the re-ranking requirement introduced in v0.10. Retain the July31/early-August selection provenance even when the audited price window begins earlier in July. This intentionally creates look-ahead selection bias in the affected earlier observations and must be disclosed; do not claim those members were selected using only information available at the earlier start. Data-start timestamps and selection-information dates are separate fields. The probe dates above do not establish full-universe dates. No signals, returns or backtest scores were calculated by this audit.
 
-### Separately authorized cached-daily exploratory pilot
+### Separately authorized assumption-based cached-daily pilot
 
-On 2026-10-04 at 18:36 JST, the user authorized testing the daily strategy using the available original25 daily cache. Record this as a separate exploratory baseline pilot. It does not replace the formal five-year daily study, maximum-available-minute study, 201 frozen membership assignments or 127 unique market/ticker universe.
+The user first authorized an original25 cached-daily baseline pilot on 2026-10-04 at 18:36 JST. At 19:48 JST, the user approved continuing under the specific price, split-record and trading-unit assumptions below, with a fixed November2024-through-August2026 test interval. This is a scoped hypothetical simulation, not a certification that those assumptions are historically true. It does not replace the formal five-year daily study, maximum-available-minute study, 201 frozen membership assignments or 127 unique market/ticker universe.
 
 | Pilot parameter | Selected scope | Status |
 |---|---|---|
-| pilot_id | original25_cached_daily_baseline | Separate exploratory study |
-| pilot_data_source | Existing daily cache only | Approved; no fresh price fetch by this scope |
+| pilot_id | original25_cached_daily_assumption_baseline | Separate qualified simulation |
+| pilot_data_source | Existing daily cache only | Approved; no fresh price fetch |
 | pilot_universe | existing_25: US12 and JP13 as frozen in Section12 | Approved; no reselection or substitution |
 | pilot_frequency | Daily | Approved |
 | pilot_strategy | Current FULL baseline with existing indicator/entry/exit parameters | Baseline only; no parameter search |
 | pilot_allocation | Primary fixed initial-capital 1/15 | Approved rules retained |
-| pilot_accounts | Separate fresh US and JP accounts at their approved initial capital, flat at pilot start | Baseline initialization retained |
+| pilot_accounts | Separate fresh US and JP accounts at their approved initial capital, flat at scored start | Baseline initialization retained |
+| pilot_scored_start_inclusive | 2024-11-01 | Market-local trading dates; no earlier trades |
+| pilot_scored_end_exclusive | 2026-09-01 | Last permitted scored date is 2026-08-31 |
+| pilot_warmup | Available October2024 observations before the scored start | Indicator warmup only; never earlier P&L or trades |
+| pilot_late_ipo_readiness | Wait for each security's actual available post-listing observations and required indicators | No pre-IPO backfill or assumed ready state |
 | pilot_optimization | false | No grid, training selection or tuning |
-| pilot_formal_holdout_evaluation | false | Do not consume the formal reserved month |
-| pilot_data_audit_required | true | Applicable price, calendar, units and corporate-action evidence required |
-| pilot_exact_scored_window | Pending applicable cache/calendar audit and holdout isolation | Cache bounds are not run dates |
-| pilot_result_label | Exploratory cached-daily original25 baseline pilot | Never a five-year/full-universe or final-holdout result |
+| pilot_formal_holdout_evaluation | false | September2026 and later price observations excluded from pilot evaluation |
+| pilot_evidence_mode | Explicitly assumption-based | Does not satisfy formal verified-data readiness |
+| pilot_result_label | Assumption-based original25 daily FULL baseline pilot | Not a formal strategy conclusion or holdout result |
 
-The available-cache inventory reports these outer observation bounds. They are descriptive metadata supplied for scoping and still require the run's immutable data-manifest verification:
+#### Economic assumption register
 
-| Market / exception | Reported first cached daily date | Reported last cached daily date | Interpretation |
+| ID | Assumption used only for this pilot | Authority/status | Not established by the assumption |
 |---|---|---|---|
-| US original12 | 2024-10-02 | 2026-10-01 | Approximately two years; not the five-year target |
-| JP original13, except Kioxia | 2024-10-02 | 2026-10-02 | Approximately two years; per-symbol validity still requires audit |
-| Kioxia 285A.T | 2024-12-18 | Within the JP cache ending 2026-10-02 | IPO-short history; verify its actual last valid observation |
+| PA01 | Cached OHLC is adjusted for splits only, without dividend adjustment | Explicitly approved simulation assumption | Yahoo/vendor field basis is not externally certified |
+| PA02 | Split records in the cache are complete for the reconstruction/model | Explicitly approved simulation assumption | Complete historical corporate-action coverage is not verified |
+| PA03 | US order unit is 1 share; JP order unit is 100 shares | Explicitly approved simulation assumption | Every security's effective historical legal unit is not verified |
+| PA04 | Each cached ticker series represents one continuously mapped issuer over its available observations | Disclosed operational assumption for this limited simulation | Issuer/ADR continuity and all historical identity events are not independently certified |
 
-Do not treat these bounds as proof of complete sessions, a common tradeable start, continuous per-symbol history, known corporate actions, vendor price basis or ready indicators. Freeze the actual eligible pilot interval only after checking the local package, legal units, identity/IPO history, calendars, missing observations, split/dividend interpretation and special actions for the original25 members. Keep the selected Yahoo/source and historical executable price/share conventions; do not make a fresh provider request or substitute another source under this pilot scope.
+Use PA01/PA02 to reconstruct the model's historical executable-price/share basis and apply effective split adjustments consistently with Section11, preserving total position cost and indicator dimensions. Retain the original cache and action records, exact hashes and transformation log. Mark the corresponding evidence fields as assumed/unverified, never as verified merely because execution is allowed. A source assumption can materially alter returns even when the arithmetic is correct.
 
-All current baseline rules still apply: independent local-currency markets; approved initial capital and fixed1/15 sizing; whole legal units; fees and current-year tax; completed-bar signals; daily next-tradable-session Open for ordinary orders; preplanned last-trading-day Open monthly liquidation and that day's buy ban; pyramiding/deduplication; cash reservations, caps, priority and the disabled price-stop/target modules. The daily pilot has no minute D20 simulation. Earlier cache observations may warm up indicators but cannot create pre-pilot trades or inherited profits.
+PA02 concerns the split records, not a blanket finding that all spin-offs, rights, mergers, ADR conversions or special distributions are absent or correctly handled. PA04 is a disclosed operational simplification, not a newly approved formal identity rule. If observed records contradict these assumptions or expose a concrete unsupported special action, malformed price, impossible split ratio, lost entitlement or invalid account state, stop the affected simulation and report it. Do not fabricate prices or proceeds, round away actual property, silently remove a frozen member, or turn an invalid run into an apparently successful all-cash return.
 
-An available cache does not waive any execution-readiness check. Keep applicable configuration/data/corporate-action guards active and scoped to the actual pilot. An unresolved material action, price-basis problem, missing valuation or other invalid account input must block the affected run with a specific reason; do not turn it into invented prices, zero returns or an apparently successful all-cash curve. An evidenced pre-IPO period, insufficient startup state or genuine absence of an eligible signal can result in no order/cash holdings under the existing rules, with explicit reasons and coverage flags. Do not silently drop or replace a frozen member to make the pilot pass.
+The available-cache inventory has reported US original12 bounds of 2024-10-02 through 2026-10-01, JP original13 bounds of 2024-10-02 through 2026-10-02, and a later first observation for Kioxia285A.T on 2024-12-18. These describe cached coverage, not the scored interval or independently verified historical tradability. Use only the selected original25 series; preserve per-symbol omissions, startup status, source metadata and hashes. The approved simulation interval does not imply that every stock can trade on its first day.
 
-Before scoring or plotting pilot returns, identify and sequester the daily interval reserved for the formal final holdout using the audited market calendars and data boundaries. The reported cache end dates may overlap that interval. Exclude it from pilot replay, performance summaries and exploratory return charts; neither its values nor pilot performance may guide parameter choices. If reliable separation cannot be established, leave the pilot blocked until it can. If any holdout returns were already inspected, record that fact and do not retain an untouched-holdout claim. This approval does not consume the formal holdout or authorize an alternative final-sample date.
+#### Technical conventions and mechanical checks
 
-Publish a pilot result only with its actual code/configuration/data hashes, account initialization, exact audited scored interval and warmup interval, original25 membership, validation receipt, execution-status flags and explicit short-history/selection/action limitations. Baseline completion, sparse or cash-only outcomes, audit failure and not-run states must be distinct. No optimization, grid comparison, parameter retuning, formal walk-forward result or final-holdout performance is authorized by this limited pilot addition.
+Reuse consistent, documented implementation conventions for this limited simulation, with their implementation version and diagnostics recorded. These are disclosed technical choices, not additional source-verification claims or blanket approval of all pending formal-study proposals:
+
+- Completed Close inputs for SMA/EMA/MACD; completed High/Low/previous Close for ADX; H equals MACD minus signal without a factor of two.
+- The existing SMA-seeded EMA and Wilder ADX recurrences, as documented in the project's technical convention record. Preserve their actual valid-observation startup and required readiness; do not replace missing startup values with zeros.
+- Use valid observed completed bars without fabricated gap bars. Carry legitimate indicator state across calendar gaps, while keeping missing-data and readiness flags explicit. Do not add a common extra entry filter or alter the approved cross/histogram rules.
+- Use observed Open and completed-Close valuation in causal event order. A future Close cannot mark an earlier Open. Any last-known mark used during a gap must remain flagged and must not turn an undefined valuation into a verified price.
+
+The qualified simulation has its own execution mode, input manifest and result namespace. Validate hashes, schema, selected members, finite and structurally consistent observations, dates, split arithmetic, indicator causality, account conservation and end-date isolation. The allowance for PA01–PA04 replaces external certainty only for this named hypothesis mode; it does not disable formal audit/readiness checks or set a generic verified-audit flag. Keep formal baseline, optimization and final-holdout execution behind their existing gates. This version approves no new technical parameter sweep or eligibility filter.
+
+#### Trading rules, interval and interpretation
+
+All current baseline rules remain: independent USD/JPY markets; approved initial capital and fixed1/15 sizing; the assumed whole units above; fees and current-year tax; completed-bar signals; daily next-tradable-session Open for ordinary orders; preplanned last-trading-day Open monthly liquidation and its full-day buy ban; pyramiding and cross-pair deduplication; reservations, caps and signal-time priority; and disabled price-stop/target modules. No minute D20 simulation is added to the daily pilot. Each account starts flat at the selected scored start; October observations cannot produce inherited orders, positions, tax or profits.
+
+For a late IPO such as Kioxia, begin its warmup only when its actual cached post-listing observations exist and permit entries only after the existing FULL-rule readiness is met. An evidenced pre-IPO period, insufficient startup state or genuine absence of signals can produce cash holdings with explicit reasons. A cash-only result caused by those valid rules is distinct from an audit/error state. Do not replace an unavailable member.
+
+Score only market-local dates from 2024-11-01 inclusive to 2026-09-01 exclusive. Sequester September2026 and later OHLC from pilot signal calculation, fill selection, valuation, return summaries and exploratory performance charts; do not let an August signal execute using a September Open. Preserve any boundary residual or unfilled order with its actual state instead of inventing a liquidation. The existing monthly schedule should be applied on the last eligible August trading day under its ordinary rules.
+
+The formal final holdout is neither evaluated nor relabeled by this simulation. Its formal date/coverage audit remains separate. No pilot outcome may select parameters, trigger optimization or be represented as an untouched final test. The cache's later observations remain outside this pilot regardless of their presence in the source package.
+
+Every output must identify the assumption-based label, PA01–PA04, actual code/configuration/cache hashes, input transformations, exact scored/warmup windows, readiness and missing-data flags, account initialization and any unresolved action limitations. Report hypothetical simulated returns only as conditional on these inputs. Do not describe them as verified market execution, a five-year/full-universe result, an optimized strategy or a formal investment conclusion. No fresh price fetch, optimization, grid comparison, parameter retuning or formal-holdout performance is authorized by this extension.
 
 ## 3 Indicators and baseline parameters
 
@@ -1017,8 +1040,9 @@ These are reporting requirements/recommendations, not existing results. The sele
 | B26 | Daily monthly liquidation at the last trading day Open with a full-day buy ban | Different month-end exposure from a Close exit; calendar-preplanned timing does not remove market-order proxy bias |
 | B27 | Fresh training candidates and separate fresh final accounts, with continuous ordinary OOS | Phase results have different account histories; final results are not a seamless continuation of the OOS ledger |
 | B28 | Unverified special corporate actions pause affected runs | Results may remain incomplete; do not hide the pause, invent entitlements or silently remove the member |
-| B29 | Original25 exploratory daily pilot uses only the available roughly two-year cache | Narrower membership and regime coverage than formal research; startup/IPO gaps and preselected-member bias remain |
-| B30 | Pilot cache bounds may overlap the formal reserved daily month | Sequester the reserved interval before pilot performance inspection; otherwise untouched-holdout status would be compromised |
+| B29 | Original25 assumption-based daily pilot uses only the selected pre-September2026 part of the available cache | Narrower membership and regime coverage; startup/IPO gaps and preselected-member bias remain |
+| B30 | Cache contains September2026 and later observations outside the approved pilot interval | Exclude them from pilot evaluation and retain the separate formal holdout gate |
+| B31 | Pilot PA01–PA04 assume split-only OHLC, complete cached split records, fixed units and series identity | Hypothetical outputs depend on unverified economic inputs; permission to simulate is not verification |
 
 Carry relevant flags into results. When a risk is resolved, document the evidence, method and version rather than erase its historical existence.
 
@@ -1032,7 +1056,7 @@ Carry relevant flags into results. When a risk is resolved, document the evidenc
 | 2 | Reserve final minute week and daily month | Durations approved; exact per-market/frequency dates require audit |
 | 3 | Establish Git version tracking | Repository implementation exists; pre-v0.14 checkpoint linked below |
 | 4 | Design code and visual interface in the project | Prior software implementation exists; v0.14 synchronization and focused verification pending |
-| 5 | Run baseline first, then tests | Formal research prerequisites remain; separate cached-original25 daily baseline pilot approved after its applicable audits, not verified as run |
+| 5 | Run baseline first, then tests | Formal prerequisites retained; scoped original25 assumption-based daily FULL baseline now permitted under Section2, not established as completed by this record |
 
 The selected project name is TrendTrade101, matching [kyon-phy/TrendTrade101](https://github.com/kyon-phy/TrendTrade101). The user-supplied remote is git@github.com:kyon-phy/TrendTrade101.git. It is a public repository; its existence does not mean project files have been pushed. Earlier name suggestions were not selected.
 
@@ -1058,21 +1082,22 @@ The inspected pre-change repository checkpoint is [f225b0772e20c6b30ee499ecae047
 
 The designated implementation task must reconcile the engine, account/run orchestration and machine configuration against this version, update repository decision/provenance records, and run focused synthetic checks before claiming synchronization. Candidate code locations include trendtrade101/engine.py and config/baseline.json; verify the actual current locations and diff rather than infer success from this checklist. Historical runs still require actual data and corporate-action audits, exact sample dates and complete run provenance. Saving this configuration does not release those data checks or turn synthetic tests into historical-performance evidence.
 
-### v0.15 pilot authorization and implementation status
+### Pilot authorization and evidence status
 
-The pilot scope is approved and recorded in Section2. Actual cache/package auditing, run-window and holdout isolation, machine-configuration synchronization and historical replay remain separate verification steps; no return is supplied by this update.
+The pilot scope and named assumptions are approved and recorded in Section2, with a selected scored interval and October warmup. Mechanical/input validation and hypothesis-mode implementation must be recorded separately from unverified economic inputs. No completed hypothetical performance is established by this configuration update.
 
 The repository's [D015 implementation record](https://github.com/kyon-phy/TrendTrade101/blob/c1be2216a79bc7127b61c0243ef375181e61a321/docs/decisions.md) and [accounting memo](https://github.com/kyon-phy/TrendTrade101/blob/c1be2216a79bc7127b61c0243ef375181e61a321/docs/accounting-v014.md) describe prior v0.14 accounting implementation and synthetic checks. Those records concern software and do not certify the newly scoped local cache or pilot performance. Record the actual current code commit, working-tree status, package digests and applicable audit receipts before executing the pilot. The historical v0.14 table above is not the current pilot-readiness gate.
 
 | Pilot stage | Current configuration-record status |
 |---|---|
-| Limited baseline scope | Approved and recorded |
-| Reported cache range | Recorded inventory; exact per-symbol validity and eligible window pending audit |
-| Original25 membership | Selected from the unchanged frozen universe |
-| Formal holdout separation | Required before any pilot performance inspection |
-| Applicable audit gates | Retained; incomplete evidence blocks affected replay |
-| Implementation synchronized to this pilot scope | Pending verification |
-| Pilot executed / historical metrics | Not established by this update |
+| Limited baseline scope | Approved as an assumption-based simulation; FULL/fixed1/15 original25 only |
+| Economic assumptions PA01–PA04 | Recorded as assumptions; external truth unverified |
+| Scored interval | 2024-11-01 inclusive to 2026-09-01 exclusive; October2024 warmup |
+| Original25 membership | Selected from the unchanged frozen universe; late IPO/readiness respected |
+| Formal holdout separation | September2026 and later price observations excluded from pilot evaluation |
+| Mechanical validation | Still required; malformed data, contradictions and invalid account states block replay |
+| Formal verified-data gates | Unchanged; hypothesis permission cannot satisfy them |
+| Hypothesis-mode implementation and run outcome | Must be separately verified and recorded |
 | Optimization / formal holdout | Outside this pilot authorization |
 
 ### Completion checklist
@@ -1113,8 +1138,10 @@ The repository's [D015 implementation record](https://github.com/kyon-phy/TrendT
 - [ ] Freeze exact holdout dates, partial-window treatment, valuation cadence and fixed parameter ordering before viewing outcomes
 - [ ] If using full weighted crossing, freeze its layout and disclose normalization/nonpositive-target behavior
 - [x] Authorize a separately labeled original25 cached-daily baseline pilot without changing the formal plan
-- [ ] Audit the pilot package, freeze its eligible interval and sequester the formal final month before performance inspection
-- [ ] Synchronize the pilot scope, retain readiness guards and record its actual outcome or blocker
+- [x] Select the pilot interval [2024-11-01,2026-09-01) and October2024 warmup, with late-IPO/readiness constraints
+- [x] Authorize explicit economic assumptions for a separately labeled hypothetical simulation without certifying those assumptions
+- [ ] Validate mechanical/input integrity and end-date isolation; synchronize the dedicated hypothesis mode
+- [ ] Record conditional simulation outputs and assumption/coverage flags, or the exact blocker; keep formal readiness unchanged
 - [ ] Complete prerequisites, then implement and validate the authorized sequence
 
 ### Update discipline
@@ -1140,8 +1167,9 @@ For every change, update value, definition, status and affected bias; retain sup
 | v0.13 | 2026-10-03 JST | Accept the proposed execution and scoring definitions: inclusive N window with once-per-cross-pair emission; nonpositive exit before peak reset and declining inclusive60%-height branch; signal-price-plus-fee reservation, shrink-only fills, market-value caps and ticker/event-ID ties; minute final-continuous-bar Open and daily month-final-trading-day Open liquidation/full-day buy ban; per-trade current-year tax with bounded refunds and no carry; Monday/month-start boundaries, after-tax eligible-neighborhood median score, drawdown/fixed-order ties and fewer-than5-closure warning without exclusion. Exact final-sample dates await audit; all201 members including PYPL and maximum actual five-minute history preserved |
 | v0.14 | 2026-10-04 JST | 15:35 approval: select historical executable prices/share units, adjust quantity/per-share cost/indicator scale on verified split effectiveness while preserving total cost, and pause affected runs for unverified special corporate actions. Each training candidate starts fresh and flat; ordinary rolling OOS stays continuous; final baseline and selected strategy use separate fresh flat accounts with prior history for indicator warmup only. Preserve all fixed members and other strategy rules. Record implementation synchronization and focused tests as pending |
 | v0.15 | 2026-10-04 JST | 18:36 approval: add a separately labeled original25 exploratory daily baseline pilot using the existing roughly two-year cache only. Preserve the formal five-year daily/max-available-minute plan, all201 memberships, baseline rules and fixed1/15 allocation. Exact pilot window remains audit-dependent; require applicable price/action checks and formal-holdout isolation. No fresh price fetch, optimization, tuning or final-holdout consumption is authorized by the pilot; record incomplete audits as blockers, not performance |
+| v0.16 | 2026-10-04 JST | 19:48 approval: permit a separately labeled assumption-based original25 daily FULL/fixed1/15 baseline for [2024-11-01,2026-09-01), with October warmup and late-IPO/readiness constraints. Assume cached OHLC is split-only adjusted, cached split records complete, and US1/JP100 units; disclose series-identity and existing technical conventions as implementation assumptions. These are not verified economic facts or blanket formal-convention approval. Preserve fees, tax, fills, account rules, frozen memberships and formal plan; no optimization, new prices or formal-holdout use |
 
 ### Basis and limits
 
-This record follows the successive decisions of 2026-10-03 and 2026-10-04, including overseas-company inclusion, English project language, maximum-minute-history selection, fixed membership with the single US daily NKE-to-PYPL exception, accepted execution/scoring definitions, the later historical executable split/share basis and research account-state policies, and the separate cached-original25 daily baseline pilot. Later explicit decisions override earlier conflicts. Indicator, fee and tax values are model inputs, not guarantees of brokerage eligibility, personal tax treatment or profitability. Source verification does not establish that data extraction, implementation or backtest execution has occurred.
+This record follows the successive decisions of 2026-10-03 and 2026-10-04, including overseas-company inclusion, English project language, maximum-minute-history selection, fixed membership with the single US daily NKE-to-PYPL exception, accepted execution/scoring definitions, the later historical executable split/share basis and research account-state policies, and the separate cached-original25 daily baseline pilot with its later explicitly approved hypothetical assumptions and fixed interval. Later explicit decisions override earlier conflicts. Indicator, fee and tax values are model inputs, not guarantees of brokerage eligibility, personal tax treatment or profitability. Source verification does not establish that data extraction, implementation or backtest execution has occurred.
 
