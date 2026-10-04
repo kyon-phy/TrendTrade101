@@ -1,13 +1,13 @@
 # TrendTrade101 Backtest Configuration
 
-Version: v0.13  
-Publication: sanitized public projection; strategy definitions and membership are unchanged  
-Source configuration SHA256: 707cf2472d97d535061395a439fbe81764e9fec53b303edb88419d90c5553bce  
-Updated: 2026-10-03 JST  
+Version: v0.14  
+Publication: sanitized public projection; strategy definitions and membership match canonical v0.14  
+Source configuration SHA256: 79c788ca74c3e21b3d56fbfe954f67d57817aa492e29b2b4fd06db08c2a3690d  
+Updated: 2026-10-04 JST  
 Project: TrendTrade101  
-Status: Memberships are frozen to the delivered review snapshot with one approved US daily exception: PYPL replaces NKE. The execution and scoring definitions below are now approved; data audit and implementation verification remain open. No backtest result is verified by this configuration update.
+Status: Memberships are frozen to the delivered review snapshot with one approved US daily exception: PYPL replaces NKE. The execution and scoring definitions, historical executable split/share basis and account-state policies below are approved and recorded. Synchronization and tests for the v0.14 changes remain pending; data audit is incomplete. This update verifies no historical backtest result.
 
-This public project configuration is derived from the authoritative v0.13 configuration record for the US and Japan historical trend-backtest project. Publication provenance and original-versus-public file hashes are recorded in public_input_provenance.json. It records selected parameters, execution assumptions, experiment design, unresolved definitions, evidence and biases. Every strategy, universe, data, cost or parameter change must update this record and its version history.
+This public project configuration is derived from the authoritative v0.14 configuration record for the US and Japan historical trend-backtest project. Publication provenance and original-versus-public file hashes are recorded in public_input_provenance.json. It records selected parameters, execution assumptions, experiment design, unresolved definitions, evidence and biases. Every strategy, universe, data, cost or parameter change must update this record and its version history.
 
 Project documents, configuration, UI, code comments and commit messages use English. This document contains no return results and does not claim that an engine, live monitor or trading system has been deployed.
 
@@ -33,7 +33,8 @@ An adjustable field is not automatically an optimization axis. Only the document
 3. After-tax training scoring, eligible-neighborhood medians, the 30% drawdown constraint, tie-breaking and the fewer-than-five-completed-trades reporting flag are approved. Exact final-holdout dates and partial-window treatment still require actual data/calendar audit.
 4. Indicator initialization, Wilder ADX/EMA startup, histogram scale, the disclosed rising-count interpretation and complete event serialization still require implementation verification. They must not create future-data leakage or duplicate a cross pair.
 5. All 201 membership rows remain frozen, including the approved US daily NKE-to-PYPL replacement. Full-US historical Top30 certification is incomplete and is not a prerequisite for the selected fixed-basket study. Preserve actual coverage, selection-date and look-ahead-bias disclosures.
-6. Five fixed-amount entry comparisons are selected. A fully crossed ADX-weighted experiment remains optional and must disclose its additional selection effects.
+6. Historical executable prices/share units, effective-date split adjustments and the training/OOS/final account-state policies are now approved. Affected real runs must pause for unverified special corporate actions; implementation synchronization and focused verification remain pending.
+7. Five fixed-amount entry comparisons are selected. A fully crossed ADX-weighted experiment remains optional and must disclose its additional selection effects.
 
 ## 2 Data and market configuration
 
@@ -411,20 +412,34 @@ Tax applies to annual net realized P&L, not gross sales or the sum of winning tr
 
 Excluding dividends, spread, slippage and FX changes creates differences from real account returns. Report USD and JPY separately; with FX disabled, do not claim one combined cross-currency asset curve.
 
-## 11 Corporate actions and normalization
+## 11 Corporate actions and historical executable units
+
+The user approved historical actual executable prices and share units on 2026-10-04 at 15:35 JST. This resolves the earlier unspecified choice between normalized quantity units and historical tradable units. The original requirement to avoid artificial split losses or indicator jumps remains.
 
 | Parameter | Current value | Meaning | Status |
 |---|---|---|---|
-| split_model | Normalized model without mechanical split jumps | Price model | Approved |
-| split_consistency | Align prices, quantities, notional and P&L units | Accounting | Principle approved |
-| dividend_model | No cash dividend income | Return model | Approved |
-| adjustment_metadata | Preserve price fields and adjustment methods | Audit record | Verification required |
+| execution_price_basis | Historical actual executable-price basis | Price at the simulated trading time | Approved; vendor basis requires evidence |
+| position_quantity_basis | Historical actual share/instrument units | Legal executable units at each time | Approved; historical units require evidence |
+| split_effective_time | Verified effective date/time before affected trading observations | Corporate-action event | Approved principle; event metadata audit |
+| split_quantity_update | Multiply filled quantity by the new-shares/old-shares ratio | Actual position ledger | Approved |
+| split_cost_per_share_update | Divide per-share cost by the same ratio | Preserve total position cost | Approved |
+| split_indicator_update | Rescale price-dimensional indicator state consistently at the effective split | Avoid a mechanical signal discontinuity | Approved |
+| split_total_cost_preserved | true | Quantity times per-share cost remains unchanged by the split itself | Approved |
+| unverified_special_corporate_action | Pause the affected run | No guessed economic treatment or silent member deletion | Approved |
+| dividend_model | No cash dividend income | Return model | Approved; unchanged |
+| adjustment_metadata | Preserve vendor fields, split events, effective timestamps and hashes | Audit record | Verification required |
 
-Do not treat a mechanical split as a loss, cross or histogram collapse. Normalized prices must have consistent quantities, fees and capital.
+For a new-to-old split ratio r, the filled quantity becomes q × r and per-share book cost becomes c / r. Total book cost q × c is preserved. For a two-for-one split, 100 shares become 200 while total cost stays the same. The executable price is expressed in the post-split units from the event's effective time; a matching mechanical price change must not create profit, loss, a cross or a histogram collapse.
 
-If retrospectively split-adjusted prices are combined with whole-share/whole-lot trading, state whether quantities represent normalized units or historical tradable units. Mixing adjusted prices with unchanged historical share counts can distort lot rounding and exposure.
+At that same effective event, translate retained price-dimensional histories and recursive indicator state to the matching scale, including the price-dimensional components underlying the indicators. Dimensionless quantities such as ADX and percentage slope must remain dimensionally consistent rather than being blindly divided by r. Apply transformations causally at the effective event, without using a later split to rewrite the simulated earlier account or making the same adjustment twice.
 
-Dividend-adjusted fields may conflict with “no dividend income.” Verify the selected Yahoo fields and distinguish splits from dividends. Do not implicitly count reinvested dividends or double-count distributions. Historical revisions and information that was not available at the simulated time remain potential biases.
+Vendor prices may already be retrospectively adjusted. Verify Yahoo's actual field basis and the split-only factors needed to reconstruct historical executable prices; a field name or today's downloaded price is not proof. Do not combine future-adjusted prices with historical unadjusted share quantities or assume that dividend-adjusted Close is an executable historical price. Preserve the original fields, transformation details and source evidence.
+
+Verify legal order units, ADR ratios and any historical changes for each affected instrument. Pending order intentions and filled-share entitlements are distinct states: audit their split handling, cash reservations, fees and eventual legal execution consistently. Do not round away actual ownership, manufacture cash-in-lieu proceeds or presume a fractional/odd-lot entitlement model. If an entitlement or special corporate action cannot be verified, pause the affected run and preserve its state and reason.
+
+Unverified spin-offs, rights, special distributions, mergers and ADR/instrument conversions need evidenced economic treatment before the affected run continues. Do not treat an unexplained price discontinuity as a strategy loss, relabel it as an ordinary split, remove the frozen member or silently skip the event. The pause is scoped to the affected run; this rule does not change membership or authorize a new data source.
+
+Cash dividend income remains excluded. Distinguish ordinary dividends from splits and special entitlements, avoid implicit dividend reinvestment or double counting, and retain the disclosed price-field/corporate-action biases. Historical revisions and information unavailable at the simulated time remain limitations even after the accounting convention is fixed.
 
 ## 12 Stock universes and evidence
 
@@ -452,7 +467,7 @@ The prior current-date market-cap ranking proposal is superseded. Today's surviv
 
 At 21:57 JST on 2026-10-03, the user instructed the project to keep the previously delivered list and stop selecting stocks again. At 22:07 JST, the user explicitly approved one exception: replace NKE with PYPL only in the US daily historical-review basket. The other 200 membership rows and every minute basket remain unchanged. The original baseline is the 201-row 12:16 UTC review snapshot, subsequently delivered to the user. The snapshot file is stock_universe_review_members.csv, SHA256 8697391da85799675eff3027c58f6982c73a8969babe2167fcaaae1582536cf5. Its old provisional status fields describe the evidence at review time; this configuration records the subsequent user selection and single replacement without rewriting that historical snapshot.
 
-The operative English public membership artifact is frozen_universe_members.csv (SHA256 c8908f73ea09ffa39a8aca1c486e87fc9c92635ed246ccc7a019842cf180f0f7), with frozen_universe_manifest.json (SHA256 72dc94bc16ae38fef13213ab59751d6dfb877cee20cca8ac00d39526dc89b7e5). Both preserve the delivered membership order except that PYPL occupies NKE's former US daily display slot. This slot is an audit order, not a claim that PayPal is the 30th-largest issuer. The frozen artifact uses historical_30_user_fixed as the operational universe ID; historical_top_30 and historical_top_30_INCOMPLETE_REVIEW_ONLY remain original review labels, not alternative baskets. It contains 127 unique market/ticker pairs across 201 membership rows. These files are reproducible projections of this selected configuration, not a separate authority.
+The operative English membership artifact is frozen_universe_members.csv (SHA256 c8908f73ea09ffa39a8aca1c486e87fc9c92635ed246ccc7a019842cf180f0f7), with frozen_universe_manifest.json (SHA256 72dc94bc16ae38fef13213ab59751d6dfb877cee20cca8ac00d39526dc89b7e5). Both preserve the delivered membership order except that PYPL occupies NKE's former US daily display slot. This slot is an audit order, not a claim that PayPal is the 30th-largest issuer. The frozen artifact uses historical_30_user_fixed as the operational universe ID; historical_top_30 and historical_top_30_INCOMPLETE_REVIEW_ONLY remain original review labels, not alternative baskets. It contains 127 unique market/ticker pairs across 201 membership rows. These files are reproducible projections of this selected configuration, not a separate authority.
 
 The 201 rows are membership assignments, not 201 distinct issuers: existing25 contributes 25, sector28 contributes 56, and US/JP historical-review baskets contribute 30 each for daily and minute horizons, or 120. Each daily_and_5m row serves both frequencies. Preserve those memberships with the single approved US daily NKE-to-PYPL replacement; retain every other member and display slot. Do not add another newly researched US member, a newly computed July list, or a June JPX minute list. There is no periodic re-ranking. A future membership change requires an explicit new user decision and configuration version.
 
@@ -801,7 +816,7 @@ Known limitations include issuer-share disclosure lag, historical-member omissio
 
 Coverage and ranking-boundary uncertainty remain evidence limitations. Under the latest explicit selection override, they no longer block freezing these exact delivered baskets. Step1 member selection is complete with the single approved US daily replacement and without claiming full-market certification. Do not continue re-ranking, silently narrow or expand the chosen lists, or make any additional replacement without a new user decision.
 
-Sequential project development and baseline/testing are authorized, but no implementation or run result is yet available for verification. This configuration maintenance has not run an engine or changed production monitoring.
+Sequential project development and baseline/testing are authorized. Prior software implementation exists, but synchronization to the current configuration and historical-run results are not verified by this document update. This configuration maintenance has not run an engine or changed production monitoring.
 
 ## 13 Causal walk-forward design
 
@@ -831,6 +846,11 @@ Sequential project development and baseline/testing are authorized, but no imple
 | calendar_week_start | Monday | Calendar boundary mapped to exchange sessions | Approved |
 | calendar_month_start | First calendar day of month | Calendar boundary mapped to exchange sessions | Approved |
 | parameter_freeze | Before each test segment | Rule | Principle approved |
+| training_account_start | Fresh initial capital and no positions for each candidate in each training fold | Independent candidate account | Approved |
+| ordinary_oos_account_state | Continuous across ordinary rolling out-of-sample folds | Carry the actual account; do not reset each fold | Approved |
+| final_baseline_account_start | Fresh initial capital and no positions | Separate final-holdout account | Approved |
+| final_selected_account_start | Fresh initial capital and no positions | Separate from baseline and prior development accounts | Approved |
+| prior_history_use_at_fresh_start | Indicator warmup only | No inherited trading account or earlier P&L | Approved |
 
 Minute folds train on the prior two calendar weeks, test the next week and advance one week. Daily folds train on the prior six calendar months, test the next month and advance one month. This replaces the earlier annual daily split.
 
@@ -838,9 +858,19 @@ Weeks begin on Monday and months at the start of the calendar month. Map those b
 
 Earlier test periods may become legitimate historical training data in later ordinary folds. Future data must never revise earlier trades. The final holdout is an explicit exception and never re-enters training.
 
+### Account state across research phases
+
+Each training candidate in each fold begins with the market's approved initial capital, a flat position ledger and a fresh trading account. Candidate comparisons do not inherit prior candidate trades, profits, losses, tax accruals, reservations or pending orders. Past legitimate data may warm up indicators but may not contribute account returns to the scored training interval. Independent candidate accounts do not change fixed initial-capital sizing or the existing market separation.
+
+Ordinary rolling out-of-sample folds form one continuous account per tested study/strategy stream. Carry actual cash, holdings, cost basis, current-year tax state, pending orders and cash reservations across fold boundaries; do not reset the account or discard residual risk to improve the curve. A parameter update for the next fold changes future decisions, not completed trades or the frozen decision snapshot of an already queued order. Existing daily/monthly liquidation rules still apply, including genuine failures to flatten.
+
+For the final untouched holdout, initialize the baseline and selected strategy as two separate fresh accounts, each at the approved initial capital and with no positions. Neither inherits a training account, ordinary OOS positions, profits, losses, reservations, pending orders or tax ledger; they also do not share cash or trades with each other. Retain earlier data only to establish legitimate indicator warmup/state. Do not generate pre-holdout trades or carry earlier order intentions into these fresh accounts.
+
+The selected account policy is a research definition, not a claim that all reported phases form one uninterrupted investable account. Ordinary OOS returns may be concatenated only with their continuous ledger. The final holdout is a separate fresh-account comparison and must not be silently appended as if it inherited the preceding OOS account. Report initialization, starting equity, interval and configuration for each phase. Parameter selection remains restricted to training, and this account definition does not permit inspecting the final holdout early.
+
 ### Warmup and final holdout
 
-Past data before a training window may initialize SMA, EMA, MACD and ADX and carry recursive state. It does not enter that fold's training score or enlarge the approved two-week/six-month window. Prior legitimate state may enter a test segment; future returns and eventual peaks may not. No later research may alter the fixed constituent list. The approved retrospective membership and later-selection minute bias remain separate limitations; causal indicator processing does not remove them.
+Past data before a training window may initialize SMA, EMA, MACD and ADX and carry recursive state. It does not enter that fold's training score or enlarge the approved two-week/six-month window. Legitimate earlier indicator state may enter a test segment; trading-account carry or reset follows the explicit phase policy above. Future returns and eventual peaks may not. No later research may alter the fixed constituent list. The approved retrospective membership and later-selection minute bias remain separate limitations; causal indicator processing does not remove them.
 
 Reserve the latest complete week/month based on each market's actual latest complete data and calendar. Do not automatically treat an unfinished current week/month as complete. Freeze exact dates after audit.
 
@@ -929,7 +959,7 @@ These are reporting requirements/recommendations, not existing results. The sele
 | B06 | US fixed review baskets have incomplete historical-market coverage and disclosure lag | User selection does not certify full-market Top30; survivorship, omitted candidates and stale share counts remain |
 | B07 | Existing25 and sector representatives can reflect present knowledge | Subjective/current-date selection and survivorship |
 | B08 | Delisting, halt, IPO, merger and rename coverage incomplete | Poor performers or untradable names may be omitted |
-| B09 | Split normalization mismatched to historical lots | Quantity, exposure and cost distortion |
+| B09 | Reconstructing historical executable price/share units from vendor-adjusted data | Incorrect factor, effective time, quantity or indicator rescaling can distort costs, exposure and signals |
 | B10 | No dividends but adjusted data may embed distributions | Hidden or double-counted returns |
 | B11 | Conditional JP zero commission and simplified tax | Different from actual eligibility/fees/tax treatment |
 | B12 | FX disabled, local currencies separate | No currency purchasing-power or conversion effects |
@@ -947,6 +977,8 @@ These are reporting requirements/recommendations, not existing results. The sele
 | B24 | Representative range=60d responses extend into July and include null/terminal observations | Audit coverage without changing frozen members; do not infer full bars, causes of nulls or universal dates |
 | B25 | Old August-selection/July31 snapshot members frozen over earlier July minute data | Explicit look-ahead selection bias; later full-market corrections and new July lists are not applied |
 | B26 | Daily monthly liquidation at the last trading day Open with a full-day buy ban | Different month-end exposure from a Close exit; calendar-preplanned timing does not remove market-order proxy bias |
+| B27 | Fresh training candidates and separate fresh final accounts, with continuous ordinary OOS | Phase results have different account histories; final results are not a seamless continuation of the OOS ledger |
+| B28 | Unverified special corporate actions pause affected runs | Results may remain incomplete; do not hide the pause, invent entitlements or silently remove the member |
 
 Carry relevant flags into results. When a risk is resolved, document the evidence, method and version rather than erase its historical existence.
 
@@ -958,17 +990,33 @@ Carry relevant flags into results. When a risk is resolved, document the evidenc
 |---:|---|---|
 | 1 | Freeze all universes with members, dates, sources and biases | Complete for selection: 201 membership rows fixed, with only the approved US daily NKE-to-PYPL change; full-US certification incomplete and selection/date biases disclosed; data readiness still unaudited |
 | 2 | Reserve final minute week and daily month | Durations approved; exact per-market/frequency dates require audit |
-| 3 | Establish Git version tracking | Destination verified; no local project initialization or push yet |
-| 4 | Design code and visual interface in the project | Authorized in the stated sequence; membership fixed, implementation not yet performed |
+| 3 | Establish Git version tracking | Repository implementation exists; pre-v0.14 checkpoint linked below |
+| 4 | Design code and visual interface in the project | Prior software implementation exists; v0.14 synchronization and focused verification pending |
 | 5 | Run baseline first, then tests | Authorized after prerequisites; not run |
 
 The selected project name is TrendTrade101, matching [kyon-phy/TrendTrade101](https://github.com/kyon-phy/TrendTrade101). The user-supplied remote is git@github.com:kyon-phy/TrendTrade101.git. It is a public repository; its existence does not mean project files have been pushed. Earlier name suggestions were not selected.
 
-The interface must show process status, intermediate results and final results, distinguishing actual output from not-started, failed and missing-data states. Do not present sample numbers as actual backtests. No implementation framework or deployment is selected yet.
+The interface must show process status, intermediate results and final results, distinguishing actual output from not-started, failed and missing-data states. Do not present sample numbers as actual backtests. Existing software/dashboard work does not establish a completed market-data audit or historical result.
 
 Do not mark later steps complete while prerequisites remain open. Do not publish raw bulk market data, private material, credentials or internal records to the public repository. Publish only authorized project files through the execution workflow.
 
 Use the baseline to check the development/rolling-test pipeline first. Preserve the final holdout until data, training grid and selection rules are frozen, then report the pre-fixed baseline and selected strategy together without adjusting rules from early holdout inspection.
+
+### v0.14 approval and implementation checkpoint
+
+The 2026-10-04 decision approves and records only the historical executable split/share basis, the pause for unverified special corporate actions, and the training/ordinary-OOS/final account-state definitions above. It does not automatically approve every other technical proposal or certify the engine's current behavior.
+
+The inspected pre-change repository checkpoint is [f225b0772e20c6b30ee499ecae04770d61369b8e](https://github.com/kyon-phy/TrendTrade101/commit/f225b0772e20c6b30ee499ecae04770d61369b8e). Its [technical convention memo](https://github.com/kyon-phy/TrendTrade101/blob/f225b0772e20c6b30ee499ecae04770d61369b8e/docs/technical-conventions-v013.md) records the earlier proposals and guarded implementation, while the [decision log](https://github.com/kyon-phy/TrendTrade101/blob/f225b0772e20c6b30ee499ecae04770d61369b8e/docs/decisions.md) preserves their earlier pending status. The linked [software CI](https://github.com/kyon-phy/TrendTrade101/actions/runs/37182846961) is prior-version evidence and cannot verify this newly recorded configuration.
+
+| Change group | Approved | Recorded in this version | Implementation synchronized to v0.14 | Focused verification |
+|---|---|---|---|---|
+| Historical executable units and split accounting | Yes | Yes | Pending | Pending |
+| Unverified special-action pause | Yes | Yes | Pending | Pending |
+| Training candidate fresh accounts | Yes | Yes | Pending | Pending |
+| Continuous ordinary rolling OOS accounts | Yes | Yes | Pending | Pending |
+| Separate fresh baseline/selected final accounts | Yes | Yes | Pending | Pending |
+
+The designated implementation task must reconcile the engine, account/run orchestration and machine configuration against this version, update repository decision/provenance records, and run focused synthetic checks before claiming synchronization. Candidate code locations include trendtrade101/engine.py and config/baseline.json; verify the actual current locations and diff rather than infer success from this checklist. Historical runs still require actual data and corporate-action audits, exact sample dates and complete run provenance. Saving this configuration does not release those data checks or turn synthetic tests into historical-performance evidence.
 
 ### Completion checklist
 
@@ -1000,6 +1048,10 @@ Use the baseline to check the development/rolling-test pipeline first. Preserve 
 - [x] Plan minute final-continuous-bar Open liquidation and daily last-trading-day Open liquidation with a full-day buy ban
 - [x] Approve per-trade current-year tax accrual/refunds without cross-year loss carry
 - [x] Freeze Monday/month-start boundaries, after-tax eligible-neighborhood median scoring and sparse-trade flag below5 closures
+- [x] Select historical executable prices/share units with effective-date split quantity, cost and indicator adjustments
+- [x] Preserve total split cost and pause affected runs for unverified special corporate actions
+- [x] Select fresh training candidates, continuous ordinary OOS, and separate fresh baseline/selected final accounts
+- [ ] Synchronize and verify v0.14 corporate-action and account-state semantics in implementation
 - [ ] Verify indicator startup/rising-count interpretation, exact event serialization, calendar and missing-fill handling
 - [ ] Freeze exact holdout dates, partial-window treatment, valuation cadence and fixed parameter ordering before viewing outcomes
 - [ ] If using full weighted crossing, freeze its layout and disclose normalization/nonpositive-target behavior
@@ -1026,8 +1078,9 @@ For every change, update value, definition, status and affected bias; retain sup
 | v0.11 | 2026-10-03 JST | 21:57 decision: freeze exactly the 201 delivered review membership rows and stop selecting again; add both US30 review tables without claiming full-market certification; restore delivered July31 JP minute members as operative; cancel v0.10's re-ranking requirement while retaining maximum actual five-minute history; explicitly disclose later-selection look-ahead bias on earlier July data; all strategy parameters and holdout durations unchanged |
 | v0.12 | 2026-10-03 JST | 22:07 decision: replace NKE with PYPL only in the US daily fixed historical-review basket; keep the other200 membership rows, displayed order, all minute baskets, maximum actual five-minute history and every strategy parameter unchanged; preserve the original review and record exactly one exception in the frozen artifacts |
 | v0.13 | 2026-10-03 JST | Accept the proposed execution and scoring definitions: inclusive N window with once-per-cross-pair emission; nonpositive exit before peak reset and declining inclusive60%-height branch; signal-price-plus-fee reservation, shrink-only fills, market-value caps and ticker/event-ID ties; minute final-continuous-bar Open and daily month-final-trading-day Open liquidation/full-day buy ban; per-trade current-year tax with bounded refunds and no carry; Monday/month-start boundaries, after-tax eligible-neighborhood median score, drawdown/fixed-order ties and fewer-than5-closure warning without exclusion. Exact final-sample dates await audit; all201 members including PYPL and maximum actual five-minute history preserved |
+| v0.14 | 2026-10-04 JST | 15:35 approval: select historical executable prices/share units, adjust quantity/per-share cost/indicator scale on verified split effectiveness while preserving total cost, and pause affected runs for unverified special corporate actions. Each training candidate starts fresh and flat; ordinary rolling OOS stays continuous; final baseline and selected strategy use separate fresh flat accounts with prior history for indicator warmup only. Preserve all fixed members and other strategy rules. Record implementation synchronization and focused tests as pending |
 
 ### Basis and limits
 
-This record follows the successive decisions of 2026-10-03, including overseas-company inclusion, English project language, maximum-minute-history selection, fixed membership with the single US daily NKE-to-PYPL exception, and the subsequently accepted execution and research-scoring definitions. Later explicit decisions override earlier conflicts. Indicator, fee and tax values are model inputs, not guarantees of brokerage eligibility, personal tax treatment or profitability. Source verification does not establish that data extraction, implementation or backtest execution has occurred.
+This record follows the successive decisions of 2026-10-03 and 2026-10-04, including overseas-company inclusion, English project language, maximum-minute-history selection, fixed membership with the single US daily NKE-to-PYPL exception, accepted execution/scoring definitions, and the later historical executable split/share basis and research account-state policies. Later explicit decisions override earlier conflicts. Indicator, fee and tax values are model inputs, not guarantees of brokerage eligibility, personal tax treatment or profitability. Source verification does not establish that data extraction, implementation or backtest execution has occurred.
 
