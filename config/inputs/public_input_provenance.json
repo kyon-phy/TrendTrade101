@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "TrendTrade101",
-  "source_configuration_version": "v0.15",
+  "source_configuration_version": "v0.16",
   "publication_kind": "sanitized_public_projection",
   "strategy_parameters_unchanged": true,
   "membership_count": 201,
@@ -32,10 +32,10 @@
     },
     {
       "name": "TrendTrade101_Backtest_Configuration.md",
-      "source_sha256": "0d0c647363ae61fd3287ad4f6ac922a12510e2945358b6d3ff17158f460be1c0",
-      "public_sha256": "2a297ba5f2203ba278a2e6b905a5637aaf30ae50852b0101db15b344a61cd1e8",
-      "source_size_bytes": 124694,
-      "public_size_bytes": 124777
+      "source_sha256": "b727826e136611f31822915375903c88967243e43e791cb5c52d89c613f8fe6b",
+      "public_sha256": "326b068299d0ce53a5fd350c2c3c4a98cfaa50d192fa0c963efcef03a5f403db",
+      "source_size_bytes": 130348,
+      "public_size_bytes": 130431
     }
   ],
   "sanitization": {
@@ -56,7 +56,7 @@
     "TrendTrade101_Backtest_Configuration.md": [
       "Added a public-projection notice and canonical source hash; clarified the authority relationship.",
       "Removed two unrelated conversation/archival-translation references.",
-      "Retained the existing public CSV and JSON-manifest hashes; all strategy, pilot-scope and membership tables match canonical v0.15."
+      "Retained existing public membership artifact hashes; all strategy, assumption-register and membership tables match canonical v0.16."
     ]
   },
   "validation": {
@@ -66,7 +66,8 @@
     "csv_change_count": 1,
     "canonical_source_bytes_verified": true,
     "fixed_membership_tables_preserved_from_v013": true,
-    "fixed_membership_tables_preserved_from_v014": true
+    "fixed_membership_tables_preserved_from_v014": true,
+    "fixed_membership_tables_preserved_from_v015": true
   },
   "scope": "Project configuration, fixed membership, and public-source references only. No price-history caches, credentials, private communications, or backtest results are included.",
   "not_bundled": [
@@ -74,7 +75,7 @@
     "frozen_review_source_201.csv"
   ],
   "interpretation": "Source checksums identify original source bytes. Public checksums identify the sanitized public files and must not be confused with the originals. Public inputs do not establish price coverage, implementation correctness, or completed strategy returns.",
-  "strategy_parameters_comparison_basis": "Public projection versus canonical v0.15, not versus prior configuration versions.",
+  "strategy_parameters_comparison_basis": "Public projection versus canonical v0.16, not versus prior configuration versions.",
   "configuration_changes_from_v013": [
     "Historical executable prices/share units; verified effective-date split quantity, per-share-cost and indicator scaling preserve total cost.",
     "Pause affected runs for unverified special corporate actions.",
@@ -84,9 +85,10 @@
   "change_status": {
     "approved": true,
     "recorded": true,
-    "pilot_scope_implementation_verified": false,
-    "pilot_applicable_data_audit_verified": false,
-    "pilot_execution_verified": false
+    "qualified_simulation_permitted": true,
+    "economic_source_verification_complete": false,
+    "formal_readiness_unchanged": true,
+    "qualified_execution_verified": false
   },
   "unchanged_membership_metadata_basis": "Existing public input provenance at repository commit f225b0772e20c6b30ee499ecae04770d61369b8e; no member or membership artifact changed in this configuration update.",
   "configuration_changes_from_v014": [
@@ -100,7 +102,7 @@
     "us_members": 12,
     "jp_members": 13,
     "frequency": "daily",
-    "run_kind": "exploratory_baseline",
+    "run_kind": "assumption_based_baseline",
     "source": "existing_cache_only",
     "allocation": "fixed_initial_capital_1_over_15",
     "reported_cache_bounds": {
@@ -114,9 +116,39 @@
       ],
       "285A.T_first": "2024-12-18"
     },
-    "actual_eligible_window": "pending_applicable_audit_and_formal_holdout_isolation",
+    "actual_eligible_window": {
+      "start_inclusive": "2024-11-01",
+      "end_exclusive": "2026-09-01",
+      "timezone_basis": "market_local_trading_dates",
+      "late_ipo_readiness_respected": true
+    },
     "optimization": false,
     "formal_holdout_evaluation": false,
-    "audit_gate_required": true
-  }
+    "audit_gate_required": true,
+    "warmup": "Available October2024 observations only before scored start; post-IPO warmup for later listings.",
+    "evidence_mode": "qualified_hypothetical_simulation_not_formal_verified_data",
+    "formal_verified_data_required_for_qualified_mode": false,
+    "mechanical_validation_required": true,
+    "approved_economic_assumptions": {
+      "PA01": "cached_ohlc_split_only_adjusted",
+      "PA02": "cached_split_records_complete",
+      "PA03": {
+        "US": 1,
+        "JP": 100
+      }
+    },
+    "disclosed_implementation_assumptions": [
+      "continuous_issuer_mapping_within_available_cached_series",
+      "existing_SMA_seeded_EMA_and_Wilder_ADX",
+      "valid_observed_bar_gap_handling",
+      "causal_Open_and_completed_Close_valuation"
+    ],
+    "economic_assumptions_verified": false,
+    "result_label": "Assumption-based original25 daily FULL baseline pilot"
+  },
+  "configuration_changes_from_v015": [
+    "Permit the separate assumption-based original25 daily FULL/fixed-1/15 simulation for 2024-11-01 inclusive through 2026-09-01 exclusive, with October2024 warmup and late-IPO/readiness constraints.",
+    "Explicit approved simulation assumptions: cached OHLC is split-only adjusted, cached split records are complete, and US1/JP100 units apply. Issuer continuity and consistent technical conventions remain disclosed implementation assumptions.",
+    "Retain source assumptions as unverified. Mechanical validity and causal boundaries still apply; formal data-readiness gates and holdout remain unchanged. No optimization or new price fetch."
+  ]
 }
