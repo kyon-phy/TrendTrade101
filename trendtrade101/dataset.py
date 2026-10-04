@@ -12,12 +12,24 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 from math import isfinite
 from .engine import Bar,OpenQuote
-from .inputs import EXPECTED,project_members
+from .inputs import EXPECTED,project_members,symbols_for
 from .storage import sha256
 from .timing import Session
 
 REQUIRED_AUDITS=("calendar","timestamps","coverage","maximum_history","identity_and_ipo",
                  "price_adjustments","corporate_actions","historical_lots","missing_data")
+PILOT_SCOPE="exploratory_existing25_daily"
+PILOT_KIND="yahoo_daily_pilot"
+PILOT_AUDITS=tuple("cache_scope" if k=="maximum_history" else k for k in REQUIRED_AUDITS)
+
+def dataset_members(root: Path, manifest: dict, *, pilot=False) -> set[str]:
+    rows=project_members(root)
+    if pilot:
+        if manifest.get("research_scope")!=PILOT_SCOPE or manifest.get("frequency")!="daily":
+            raise ValueError("Pilot scope must be existing-25 daily only")
+        return set(symbols_for(rows,manifest["market"],"existing_25","daily"))
+    return {r["ticker"] for r in rows if r["market"]==manifest["market"]
+            and r["frequency"] in (manifest["frequency"],"daily_and_5m")}
 
 def fingerprint(value) -> str:
     return hash_bytes(json.dumps(value,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
@@ -48,21 +60,22 @@ class Dataset:
     @property
     def market(self): return self.manifest["market"]
 
-def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
+def load_dataset(root: Path, path: Path, *, allow_synthetic=False, allow_pilot=False) -> Dataset:
     manifest=json.loads(path.read_text())
     kind=manifest.get("kind")
-    if kind=="synthetic_fixture":
+    pilot=kind in (PILOT_KIND,"synthetic_pilot_fixture")
+    if pilot and not allow_pilot:
+        raise ValueError("Pilot datasets require the isolated pilot route; formal research is prohibited")
+    if kind in ("synthetic_fixture","synthetic_pilot_fixture"):
         if not allow_synthetic:
             raise ValueError("Synthetic data requires the explicit synthetic fixture route")
-    elif kind!="yahoo_audited":
-        raise ValueError("Dataset must be synthetic_fixture or yahoo_audited")
+    elif kind not in ("yahoo_audited",PILOT_KIND):
+        raise ValueError("Unrecognized audited dataset kind")
     if manifest["configuration_source_sha256"] != EXPECTED["TrendTrade101_Backtest_Configuration.md"]:
         raise ValueError("Dataset audit targets a different canonical configuration")
     if manifest["frequency"] not in ("daily","5m") or manifest["market"] not in ("US","JP"):
         raise ValueError("Invalid market/frequency")
-    rows=project_members(root)
-    selected={r["ticker"] for r in rows if r["market"]==manifest["market"]
-              and r["frequency"] in (manifest["frequency"],"daily_and_5m")}
+    selected=dataset_members(root,manifest,pilot=pilot)
     symbols=set(manifest["members"])
     if symbols != selected:
         raise ValueError("Dataset must account for every frozen market/frequency member")
@@ -71,14 +84,14 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
         raise ValueError("Unsupported price/quantity basis; do not silently use dividend-adjusted prices")
     if not manifest.get("calendar_complete_through"):
         raise ValueError("Full calendar coverage must be recorded")
-    if kind=="yahoo_audited":
+    if kind in ("yahoo_audited",PILOT_KIND):
         if not manifest.get("calendar_complete_from") or not manifest.get("study_start"):
             raise ValueError("Real packages require explicit calendar coverage and study-start boundaries")
         if not datetime.fromisoformat(manifest["study_start"]).tzinfo:
             raise ValueError("Study-start boundary must include a timezone")
         receipt=manifest.get("audit",{})
         if any(receipt.get(k,{}).get("status")!="verified" or not receipt[k].get("evidence")
-               for k in REQUIRED_AUDITS):
+               for k in (PILOT_AUDITS if pilot else REQUIRED_AUDITS)):
             raise ValueError("Incomplete data audit receipt")
         if manifest.get("provider")!="Yahoo" or not manifest.get("source_snapshots"):
             raise ValueError("Missing Yahoo snapshot provenance")
@@ -105,7 +118,7 @@ def load_dataset(root: Path, path: Path, *, allow_synthetic=False) -> Dataset:
         bars.append(Bar(**record))
     if any(b.ticker not in symbols for b in bars):
         raise ValueError("Data contains a security outside frozen membership")
-    if kind=="yahoo_audited" and not manifest.get("opens_file"):
+    if kind in ("yahoo_audited",PILOT_KIND) and not manifest.get("opens_file"):
         raise ValueError("Real packages require independent executable Open observations")
     if manifest.get("opens_file"):
         quote_path=(path.parent/manifest["opens_file"]).resolve()

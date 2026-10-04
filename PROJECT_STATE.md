@@ -5,7 +5,7 @@ This is a concise evidence index, not the strategy authority or a claim that the
 ```json
 {
   "schema_version": 1,
-  "recorded_at": "2026-10-04T07:02:11.496914+00:00",
+  "recorded_at": "2026-10-04T09:53:31.993143+00:00",
   "verified_checkpoint": {
     "commit": "c1be2216a79bc7127b61c0243ef375181e61a321",
     "tests_passed": 109,
@@ -15,14 +15,14 @@ This is a concise evidence index, not the strategy authority or a claim that the
     "artifact_sha256": "3075bb530ff62989b0790e673fe465cec59bb4b7369df5f8808281a11bd47d39"
   },
   "configuration": {
-    "version": "v0.14",
+    "version": "v0.15",
     "public_path": "config/inputs/TrendTrade101_Backtest_Configuration.md",
-    "public_sha256": "48fa986f650168253d8eeff612178376f50eeeec0868efce0e83408f7f85f034",
-    "source_sha256": "79c788ca74c3e21b3d56fbfe954f67d57817aa492e29b2b4fd06db08c2a3690d",
+    "public_sha256": "2a297ba5f2203ba278a2e6b905a5637aaf30ae50852b0101db15b344a61cd1e8",
+    "source_sha256": "0d0c647363ae61fd3287ad4f6ac922a12510e2945358b6d3ff17158f460be1c0",
     "provenance_path": "config/inputs/public_input_provenance.json",
-    "provenance_sha256": "3edc8ef764b276665cb488145e16fc2567da79a3eb5fe635569241959910d311",
+    "provenance_sha256": "281966ddc1daeca120326a8a66948fd8ea7b3b9ec7f241d6e26c8f823c3b6be2",
     "implementation_path": "config/baseline.json",
-    "implementation_sha256": "3a56dba5b787a11cd5e0017dd1377d7c36d92f49d8fc595cc3ebba952d949ab0"
+    "implementation_sha256": "11fd51dca3960df40a91412cfe56dc574be2b401cffcec6b01355defb1c39e70"
   },
   "research": {
     "dataset_sha256": null,
@@ -51,6 +51,11 @@ This is a concise evidence index, not the strategy authority or a claim that the
       "id": "technical_sync",
       "status": "pending",
       "evidence": "docs/technical-conventions-v013.md"
+    },
+    {
+      "id": "pilot_private_input_and_evidence",
+      "status": "pending",
+      "evidence": "docs/daily-pilot-contract.md"
     }
   ],
   "pending_decisions": [
@@ -58,11 +63,19 @@ This is a concise evidence index, not the strategy authority or a claim that the
     "D003"
   ],
   "next_actions": [
-    "The three v0.14 split/account fields are approved and synchronized. Verify/freeze the remaining startup, gap, valuation and partial-window conventions with the canonical owner; do not reopen settled choices or enable real execution from synthetic tests.",
-    "Keep this executor's Yahoo requests paused: parent preflight still returned HTTP 429 on October 4 despite effective hostname authorization. Dedicated preflight stays coordinated with the parent; the exact limiting layer remains unknown. See D011 and the network evidence receipt.",
-    "After authorized connectivity and actual data audits, freeze data/configuration/code and holdout dates; run baseline before optimization.",
-    "At each material milestone, reconcile this index with actual Git, CI, artifacts and run evidence."
-  ]
+    "Receive the private existing-25 cache using docs/daily-pilot-contract.md; preserve pending audit entries. No Yahoo requests or public price uploads.",
+    "Complete price-basis, historical legal-lot, issuer/action evidence and remaining technical verification. Freeze eligible pilot dates and sequester the formal daily final month before any returns.",
+    "Run the isolated FULL-only daily baseline after applicable gates pass. Do not optimize or consume the formal holdout.",
+    "Obtain the requested pinned Ponytail text review through the coordinating owner; no Ponytail tool or skill is available in this executor."
+  ],
+  "pilot": {
+    "scope": "existing_25_daily_FULL_fixed_baseline",
+    "status": "not_run",
+    "dataset_sha256": null,
+    "exact_interval": "not_frozen",
+    "formal_holdout_consumed": false,
+    "evidence": "docs/daily-pilot-contract.md"
+  }
 }
 ```
 

@@ -59,10 +59,11 @@ def audit_chart(payload: dict, sessions: list[Session], *, frequency: str) -> di
         if v == 0:
             counts["zero_volume"] += 1
         bars.append({"start":dt.isoformat(), "end":end.isoformat(), **values})
-    if frequency == "5m" and stamps:
+    if stamps:
         first, last = min(stamps), max(stamps)
         valid = {int(datetime.fromisoformat(b["start"]).timestamp()) for b in bars}
-        counts["missing_expected_intervals"] = sum(t not in valid for t in expected if first <= t <= last)
+        grid=expected if frequency=="5m" else {int(s.start.timestamp()) for s in sessions}
+        counts["missing_expected_intervals"] = sum(t not in valid for t in grid if first <= t <= last)
     counts["returned"] = len(stamps)
     counts["usable"] = len(bars)
     counts["usable_opens"] = len(opens)

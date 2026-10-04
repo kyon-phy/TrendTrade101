@@ -4,6 +4,33 @@ import json
 from pathlib import Path
 from .storage import read_json,utcnow,write_json
 
+def pilot_progress(root:Path):
+    runs=[]
+    for folder in sorted((root/".private/pilots").glob("*")):
+        plan=read_json(folder/"plan.json")
+        if not plan or plan.get("dataset_kind")!="yahoo_daily_pilot":continue
+        progress=read_json(folder/"progress.json",{})
+        runs.append({"run":folder.name,"market":plan["market"],"interval":plan["interval"],
+            "protected_from":plan["protected_from"],"stage":progress.get("stage","pilot_plan_frozen"),
+            "baseline_complete":(folder/"baseline-complete.json").exists(),"formal_holdout_consumed":False})
+    return runs
+
+def pilot_results(root:Path):
+    records=[]
+    for folder in sorted((root/".private/pilots").glob("*")):
+        plan=read_json(folder/"plan.json")
+        if not plan or plan.get("dataset_kind")!="yahoo_daily_pilot":continue
+        for path in sorted((folder/"baseline").glob("*.json")):
+            r=read_json(path)
+            if r.get("dataset_kind")!="yahoo_daily_pilot" or r.get("phase")!="exploratory_daily_pilot":continue
+            records.append({"run":folder.name,"market":plan["market"],"frequency":"daily",
+                "universe":"existing_25","arm":path.stem,"phase":"exploratory_daily_pilot",
+                "metrics":r["metrics"],"equity":[{"time":p["time"],"equity":p["equity"]} for p in r["equity"]],
+                "configuration_version":r["configuration_version"],
+                "account_initialization":r["account_initialization"],"limitations":r["limitations"],
+                "protected_from":plan["protected_from"],"formal_holdout_consumed":False})
+    return records
+
 def research_progress(root:Path):
     runs=[]
     for folder in sorted((root/".private/runs").glob("*")):
@@ -21,8 +48,7 @@ def research_progress(root:Path):
 def result_catalog(root:Path):
     records=[]
     base=root/".private"/"runs"
-    if not base.exists():return records
-    for folder in sorted(base.iterdir()):
+    for folder in sorted(base.glob("*")):
         plan=read_json(folder/"plan.json")
         if not plan or plan.get("dataset_kind")!="yahoo_audited":continue
         progress=read_json(folder/"progress.json",{})
@@ -53,7 +79,7 @@ def result_catalog(root:Path):
                         "metrics":r["metrics"],"equity":[{"time":p["time"],"equity":p["equity"]} for p in r["equity"]],
                         "configuration_version":r["configuration_version"],
                         "account_initialization":r.get("account_initialization")})
-    return records
+    return records+pilot_results(root)
 
 def export_dashboard(root:Path,destination:Path):
     from .readiness import status

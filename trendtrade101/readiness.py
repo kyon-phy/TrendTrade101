@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from .inputs import verify_project_inputs, EXPECTED
 from .storage import read_json, utcnow
-from .dashboard import result_catalog, research_progress
+from .dashboard import result_catalog, research_progress,pilot_progress
 
 STAGES = ("inputs","canonical_sync","data_audit","holdout_freeze","baseline","optimization","final_holdout")
 
@@ -48,7 +48,7 @@ def status(root: Path) -> dict:
                    if inputs["status"]=="verified" else "; ".join(inputs["problems"])},
         {"id":"canonical_sync","name":"Configuration synchronization",
          "status":"complete" if config.get("canonical_definitions_synchronized") and config.get("source_sha256")==EXPECTED["TrendTrade101_Backtest_Configuration.md"] else "blocked",
-         "detail":"Approved v0.14 split and account-state definitions reconciled; remaining technical conventions and data checks are listed below."},
+         "detail":"Approved split/account policies and v0.15 pilot scope reconciled; remaining technical conventions and data checks are listed below."},
         {"id":"data_audit","name":"Market data audit","status":data_status,"detail":data_detail},
         {"id":"holdout_freeze","name":"Holdout reservation","status":"not_started",
          "detail":"Last complete week/month policy retained; exact audited dates pending."},
@@ -76,6 +76,7 @@ def status(root: Path) -> dict:
                           "markets":config.get("markets",{}),"research":config.get("research",{})},
             "provider_preflight":provider,
             "verification":state.get("verification",{}),"results":result_catalog(root),"runs":runs,
+            "pilots":pilot_progress(root),"pilot_configuration":read_json(root/"config/daily_pilot.json",{}),
             "access":{"mode":"read_only","data":"No raw vendor data is exposed."}}
 
 def require_ready(root: Path):

@@ -9,16 +9,24 @@ from math import prod
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from .audit import audit_chart
-from .dataset import REQUIRED_AUDITS,load_dataset,unresolved_action_symbols
-from .inputs import EXPECTED,project_members
+from .dataset import REQUIRED_AUDITS,PILOT_AUDITS,PILOT_KIND,PILOT_SCOPE,load_dataset,unresolved_action_symbols
+from .inputs import EXPECTED,project_members,symbols_for
 from .storage import read_json,sha256,write_json,utcnow
 from .timing import Session
 
-def audit_local_charts(root:Path,capture_path:Path,output:Path):
+def audit_local_charts(root:Path,capture_path:Path,output:Path,*,pilot=False):
     capture=read_json(capture_path)
     if capture.get("provider")!="Yahoo": raise ValueError("Only the approved Yahoo source is supported")
+    if pilot:
+        if capture.get("research_scope")!=PILOT_SCOPE or capture.get("frequency")!="daily":
+            raise ValueError("Pilot captures must identify the existing-25 daily scope")
+        if capture.get("configuration_source_sha256")!=EXPECTED["TrendTrade101_Backtest_Configuration.md"]:
+            raise ValueError("Pilot capture targets a different canonical configuration")
+    elif capture.get("research_scope")==PILOT_SCOPE:
+        raise ValueError("Pilot captures require audit-pilot-local; formal audit gates are unchanged")
     review=capture.get("review",{})
-    if any(review.get(k,{}).get("status")!="verified" or not review[k].get("evidence") for k in REQUIRED_AUDITS):
+    required=PILOT_AUDITS if pilot else REQUIRED_AUDITS
+    if any(review.get(k,{}).get("status")!="verified" or not review[k].get("evidence") for k in required):
         raise ValueError("Supply completed, evidence-backed audits; booleans alone are insufficient")
     unresolved_action_symbols(capture)
     market,frequency=capture["market"],capture["frequency"]
@@ -29,6 +37,7 @@ def audit_local_charts(root:Path,capture_path:Path,output:Path):
     if not study_start.tzinfo or study_start>=as_of:raise ValueError("An audited study-start boundary is required")
     members={r["ticker"] for r in project_members(root) if r["market"]==market
              and r["frequency"] in (frequency,"daily_and_5m")}
+    if pilot:members=set(symbols_for(project_members(root),market,"existing_25","daily"))
     if set(capture["members"])!=members: raise ValueError("Capture inventory differs from frozen membership")
     calendar_file=(capture_path.parent/capture["calendar_file"]).resolve()
     if not calendar_file.is_relative_to(capture_path.parent.resolve()) or sha256(calendar_file)!=capture["calendar_sha256"]:
@@ -124,7 +133,15 @@ def audit_local_charts(root:Path,capture_path:Path,output:Path):
         stop=key+timedelta(days=7) if frequency=="5m" else month_shift(key,1)
         if known_through>=stop-timedelta(days=1) and last in complete:
             period_ends.append(last.isoformat())
-    manifest={"schema_version":1,"kind":"yahoo_audited","provider":"Yahoo","market":market,
+    for evidence in capture.get("evidence_files",[]):
+        source=(capture_path.parent/evidence["file"]).resolve()
+        if not source.is_relative_to(capture_path.parent.resolve()) or sha256(source)!=evidence["sha256"]:
+            raise ValueError("Audit evidence path/hash mismatch")
+        target=output/"evidence"/source.relative_to(capture_path.parent.resolve())
+        target.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
+        target.write_bytes(source.read_bytes());target.chmod(0o600)
+        raw_sources.append({"file":str(target.relative_to(output)),"sha256":evidence["sha256"],"kind":"audit_evidence"})
+    manifest={"schema_version":1,"kind":PILOT_KIND if pilot else "yahoo_audited","provider":"Yahoo","market":market,
         "frequency":frequency,"timezone":capture["timezone"],"as_of_date":as_of.astimezone(tz).date().isoformat(),
         "study_start":study_start.isoformat(),
         "configuration_source_sha256":EXPECTED["TrendTrade101_Backtest_Configuration.md"],
@@ -141,8 +158,9 @@ def audit_local_charts(root:Path,capture_path:Path,output:Path):
         "source_snapshots":raw_sources,"splits":splits,"audit":review,
         "unresolved_corporate_actions":capture.get("unresolved_corporate_actions",[]),
         "per_symbol_audit":audits,"audited_at":utcnow()}
+    if pilot:manifest["research_scope"]=PILOT_SCOPE
     write_json(output/"dataset.json",manifest)
-    validated=load_dataset(root,output/"dataset.json")
+    validated=load_dataset(root,output/"dataset.json",allow_pilot=pilot)
     return {"dataset":str(output/"dataset.json"),"members":len(members),"usable_bars":len(bars),
             "dataset_digest":validated.digest,
             "complete_periods":len(period_ends),"status":"audited_local_package",

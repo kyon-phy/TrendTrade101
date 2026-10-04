@@ -313,3 +313,41 @@ This incremental log begins with checked repository evidence and the current nar
   "supersedes": "D008"
 }
 ```
+
+## D017
+
+```json
+{
+  "id": "D017",
+  "recorded_at": "2026-10-04T09:53:31.993143+00:00",
+  "domain": "strategy",
+  "status": "approved",
+  "summary": "Canonical v0.15 authorizes only a separately labeled existing-25 cached-daily FULL baseline with fixed 1/15 allocation. Formal five-year and maximum-minute research, frozen memberships and untouched holdout remain unchanged. No fresh prices, optimization or holdout performance under this scope. Exact eligible dates and applicable audit/technical verification remain prerequisites.",
+  "evidence": [
+    "config/inputs/TrendTrade101_Backtest_Configuration.md",
+    "config/inputs/public_input_provenance.json"
+  ],
+  "pending_fields": [],
+  "supersedes": null
+}
+```
+
+## D018
+
+```json
+{
+  "id": "D018",
+  "recorded_at": "2026-10-04T09:53:31.993143+00:00",
+  "domain": "software",
+  "status": "implemented",
+  "summary": "Added isolated daily-pilot import, plan, FULL baseline and dashboard labels. Pilot data cannot enter formal research, cannot write the formal holdout registry, and uses separate private run directories. Both execution flags remain false. Private inputs and the requested pinned Ponytail review remain unavailable in this executor.",
+  "evidence": [
+    "docs/daily-pilot-contract.md",
+    "config/daily_pilot.json",
+    "trendtrade101/pilot.py",
+    "tests/test_daily_pilot.py"
+  ],
+  "pending_fields": [],
+  "supersedes": null
+}
+```

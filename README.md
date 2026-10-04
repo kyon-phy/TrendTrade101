@@ -4,7 +4,7 @@ Auditable US and Japan trend-strategy research with a read-only progress console
 
 For continued work, start with [PROJECT_STATE.md](PROJECT_STATE.md), [AGENTS.md](AGENTS.md) and the [repository-local continuity skill](.agents/skills/maintain-project-context/SKILL.md). The state file is a short evidence index; recover actual Git/CI/data status before relying on it.
 
-**Current state:** the authorized public input derivatives are verified: 201 memberships, 127 unique securities and the approved PYPL substitution. Canonical configuration v0.14 records historical executable split/share accounting, fresh training/final accounts and continuous ordinary OOS accounts. The implementation has synthetic regression coverage; remaining technical conventions and actual data audits still gate real execution. The latest parent-observed Yahoo preflight returned HTTP 429 despite effective hostname authorization; its limiting layer is unknown. No historical baseline, optimization or final-holdout returns have been calculated.
+**Current state:** the authorized public input derivatives are verified: 201 memberships, 127 unique securities and the approved PYPL substitution. Canonical configuration v0.15 retains approved accounting and adds an isolated existing-25 cached-daily FULL baseline pilot. Its private data and applicable evidence have not yet been supplied to this executor. The implementation has synthetic regression coverage; remaining technical conventions and actual data audits still gate real execution. The latest parent-observed Yahoo preflight returned HTTP 429 despite effective hostname authorization; its limiting layer is unknown. No historical baseline, optimization or final-holdout returns have been calculated.
 
 ## Open the console
 
@@ -51,3 +51,5 @@ Frozen historical US baskets are user-fixed estimated subsets, not certified who
 See [architecture](docs/architecture.md), [execution definitions](docs/execution-definitions.md), [data and runs](docs/data-and-runs.md), [network access](docs/network-access.md) and [current blockers](docs/status.md).
 
 The [v0.14 accounting synchronization](docs/accounting-v014.md) records the approved split/account policies and regression evidence. The [technical convention audit](docs/technical-conventions-v013.md) retains the remaining proposals, optional JP ADX sizing and data evidence still required before historical execution.
+
+The [daily pilot input contract](docs/daily-pilot-contract.md) defines private handoff and audit fields. The dedicated pilot commands cannot optimize parameters or consume the formal holdout. Both formal and pilot execution remain locked pending their applicable evidence.

@@ -6,17 +6,17 @@ from pathlib import Path
 from .storage import sha256, utcnow
 
 EXPECTED = {
-    "TrendTrade101_Backtest_Configuration.md": "79c788ca74c3e21b3d56fbfe954f67d57817aa492e29b2b4fd06db08c2a3690d",
+    "TrendTrade101_Backtest_Configuration.md": "0d0c647363ae61fd3287ad4f6ac922a12510e2945358b6d3ff17158f460be1c0",
     "frozen_universe_members.csv": "6441e090ca88ad8dd5d557b3cdbcca3d71971bec0c0070a750f67ca069a8e2b0",
     "frozen_universe_manifest.json": "3ee4c294809fe90619fe9eb06dbb110b53c6526ae21c47396a86f9a54a304b07",
     "frozen_universe_manifest.md": "7c4cee332c1e5b5d04f7e938c40bf30661cceb996fb997551a700e000e220af7",
 }
 PUBLIC_EXPECTED = {
-    "TrendTrade101_Backtest_Configuration.md": "48fa986f650168253d8eeff612178376f50eeeec0868efce0e83408f7f85f034",
+    "TrendTrade101_Backtest_Configuration.md": "2a297ba5f2203ba278a2e6b905a5637aaf30ae50852b0101db15b344a61cd1e8",
     "frozen_universe_members.csv": "c8908f73ea09ffa39a8aca1c486e87fc9c92635ed246ccc7a019842cf180f0f7",
     "frozen_universe_manifest.json": "72dc94bc16ae38fef13213ab59751d6dfb877cee20cca8ac00d39526dc89b7e5",
     "frozen_universe_manifest.md": "04378fcb29c0944e784edda5a0f86b6c177be4222f7a8ce50bafdbcc49e82e95",
-    "public_input_provenance.json": "3edc8ef764b276665cb488145e16fc2567da79a3eb5fe635569241959910d311",
+    "public_input_provenance.json": "281966ddc1daeca120326a8a66948fd8ea7b3b9ec7f241d6e26c8f823c3b6be2",
 }
 
 class InputError(ValueError):
@@ -48,7 +48,7 @@ def verify(directory: Path, *, kind: str = "original_source") -> dict:
         provenance = json.loads((directory / "public_input_provenance.json").read_text())
         if provenance["publication_kind"] != "sanitized_public_projection":
             raise InputError("Wrong public provenance type")
-        if provenance["source_configuration_version"] != "v0.14" or not (
+        if provenance["source_configuration_version"] != "v0.15" or not (
             provenance["strategy_parameters_unchanged"] and provenance["membership_and_order_unchanged"]):
             raise InputError("Unapproved public derivation")
         for item in provenance["files"]:

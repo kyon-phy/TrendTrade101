@@ -64,10 +64,12 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
            dataset_kind: str, audit_digest: str | None = None,
            allow_entries: bool = True, splits: list[dict] | None = None,
            open_quotes: list[OpenQuote] | None = None, market: str | None = None) -> dict:
-    if dataset_kind not in ("synthetic","yahoo_audited"):
+    if dataset_kind not in ("synthetic","yahoo_audited","yahoo_daily_pilot"):
         raise ValueError("Unrecognized or unaudited dataset kind")
-    if dataset_kind=="yahoo_audited" and not re.fullmatch(r"[0-9a-f]{64}",audit_digest or ""):
+    if dataset_kind!="synthetic" and not re.fullmatch(r"[0-9a-f]{64}",audit_digest or ""):
         raise ValueError("Real replay requires a verified dataset audit digest")
+    if dataset_kind=="yahoo_daily_pilot" and frequency!="daily":
+        raise ValueError("Exploratory cache pilot is daily only")
     if frequency not in ("5m","daily") or end <= start:
         raise ValueError("Invalid replay interval/frequency")
     indicators, signals = {}, {}

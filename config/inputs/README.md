@@ -1,8 +1,8 @@
 # Public project inputs
 
-These are sanitized public projections of TrendTrade101 configuration v0.14 and its frozen universe files. Original source identities remain unchanged; all source and public SHA256 checksums are recorded in [public_input_provenance.json](public_input_provenance.json).
+These are sanitized public projections of TrendTrade101 configuration v0.15 and its frozen universe files. Original source identities remain unchanged; all source and public SHA256 checksums are recorded in [public_input_provenance.json](public_input_provenance.json).
 
-- [TrendTrade101_Backtest_Configuration.md](TrendTrade101_Backtest_Configuration.md): complete v0.14 strategy specification, preserving all parameter tables and membership definitions
+- [TrendTrade101_Backtest_Configuration.md](TrendTrade101_Backtest_Configuration.md): complete v0.15 strategy specification, preserving all parameter tables and membership definitions
 - [frozen_universe_members.csv](frozen_universe_members.csv): 201 ordered membership records and 127 unique market/ticker pairs
 - [frozen_universe_manifest.json](frozen_universe_manifest.json): the eight exact ordered groups, provenance and limitations
 - [frozen_universe_manifest.md](frozen_universe_manifest.md): readable membership interpretation

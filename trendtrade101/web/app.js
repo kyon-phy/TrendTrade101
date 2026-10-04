@@ -29,6 +29,8 @@ function render(s){
   $('biases').replaceChildren(...s.biases.map(x=>node('li',x)));
   const v=s.verification;
   $('verification').textContent=v.tests_passed ? v.tests_passed+' software tests passed · '+v.checked_at : 'No completed test record.';
+  const pilots=s.pilots||[];
+  $('pilots').replaceChildren(...(pilots.length?pilots.map(p=>node('p',p.market+' · '+p.stage.replaceAll('_',' ')+' · '+p.interval.start+' to '+p.interval.end+' (exclusive) · protected from '+p.protected_from)):[node('p',s.pilot_configuration?.execution_ready?'Awaiting an audited private cache and frozen pilot plan.':'Awaiting canonical pilot scope, technical verification and audited private data.') ]));
   renderResults();
 }
 function renderResults(){
@@ -45,6 +47,11 @@ function renderResults(){
   for(const r of results){
     const row=node('article','','result-row'),m=r.metrics;
     row.append(node('h3',r.universe+' · '+r.arm),node('p',r.phase.replaceAll('_',' ')+' · '+r.configuration_version));
+    if(r.phase==='exploratory_daily_pilot'){
+      row.append(node('p','Exploratory daily pilot · Not the formal five-year study','badge blocked'),
+        node('p','No optimization. Final holdout remains sealed; observations from '+r.protected_from+' are excluded.'));
+      const notes=node('details');notes.append(node('summary','Pilot scope and limitations'),...r.limitations.map(x=>node('p',x)));row.append(notes);
+    }
     if(r.account_initialization)row.append(node('p',r.account_initialization==='fresh_initial_flat'?'Fresh initial-capital flat account':'Continuous ordinary out-of-sample account'));
     const values=node('dl');
     if(m.initial_equity!==undefined)values.append(node('dt','Starting account equity'),node('dd',m.initial_equity.toLocaleString(undefined,{maximumFractionDigits:2})+' '+(r.market==='JP'?'JPY':'USD')));

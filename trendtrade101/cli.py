@@ -19,9 +19,15 @@ def main(argv=None):
         run.add_argument("--run-dir",type=Path,default=Path(".private/runs/current"))
         run.add_argument("--universe",default="existing_25")
         run.add_argument("--synthetic",action="store_true",help="Explicitly use synthetic fixtures, never historical results")
-    audit=commands.add_parser("audit-local")
-    audit.add_argument("--capture",required=True,type=Path)
-    audit.add_argument("--output",required=True,type=Path)
+    for command in ("audit-local","audit-pilot-local"):
+        audit=commands.add_parser(command)
+        audit.add_argument("--capture",required=True,type=Path)
+        audit.add_argument("--output",required=True,type=Path)
+    for command in ("pilot-plan","pilot-baseline"):
+        run=commands.add_parser(command)
+        run.add_argument("--dataset",required=True,type=Path)
+        run.add_argument("--run-dir",required=True,type=Path)
+        run.add_argument("--synthetic",action="store_true",help="Synthetic software test only")
     export=commands.add_parser("export-dashboard")
     export.add_argument("--output",type=Path,required=True)
     dashboard = commands.add_parser("dashboard")
@@ -43,12 +49,33 @@ def main(argv=None):
         from .dashboard import export_dashboard
         print(json.dumps(export_dashboard(root,args.output)))
         return 0
-    if args.command == "audit-local":
+    if args.command in ("audit-local","audit-pilot-local"):
         from .audit_package import audit_local_charts
         try:
-            print(json.dumps(audit_local_charts(root,args.capture,args.output)))
+            pilot=args.command=="audit-pilot-local"
+            if pilot:
+                from .pilot import private_directory
+                private_directory(root,args.output)
+            print(json.dumps(audit_local_charts(root,args.capture,args.output,pilot=pilot)))
             return 0
         except (ValueError,KeyError,OSError) as exc:
+            print(json.dumps({"status":"blocked","error":str(exc)}))
+            return 2
+    if args.command in ("pilot-plan","pilot-baseline"):
+        try:
+            from .dataset import load_dataset
+            from .pilot import freeze_pilot,run_pilot
+            dataset=load_dataset(root,args.dataset,allow_synthetic=args.synthetic,allow_pilot=True)
+            if args.synthetic and dataset.kind!="synthetic_pilot_fixture":
+                raise ValueError("--synthetic requires a synthetic pilot fixture")
+            directory=args.run_dir if args.run_dir.is_absolute() else root/args.run_dir
+            action=freeze_pilot if args.command=="pilot-plan" else run_pilot
+            result=action(root,dataset,directory)
+            print(json.dumps({"status":"synthetic_test_only" if args.synthetic else "completed",
+                "phase":args.command,"research_scope":"exploratory_existing25_daily",
+                "formal_holdout_consumed":False,"result":result},allow_nan=False))
+            return 0
+        except (RuntimeError,ValueError,KeyError,OSError,TypeError) as exc:
             print(json.dumps({"status":"blocked","error":str(exc)}))
             return 2
     if args.command in ("plan","baseline","optimize","freeze-final","holdout"):

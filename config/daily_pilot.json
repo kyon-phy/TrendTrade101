@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "research_scope": "exploratory_existing25_daily",
+  "source_version": "v0.15",
+  "source_sha256": "0d0c647363ae61fd3287ad4f6ac922a12510e2945358b6d3ff17158f460be1c0",
+  "scope_approval": "recorded",
+  "execution_ready": false,
+  "interval": null,
+  "protected_from": null,
+  "technical_conventions": null
+}

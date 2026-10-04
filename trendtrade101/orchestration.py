@@ -41,6 +41,8 @@ def midnight(d,timezone):
     return datetime.combine(d,time.min,tzinfo=ZoneInfo(timezone))
 
 def freeze_plan(root: Path, dataset: Dataset, universe: str, run_dir: Path) -> dict:
+    if dataset.kind not in ("yahoo_audited","synthetic_fixture"):
+        raise ValueError("Pilot data cannot enter formal research")
     config=read_json(root/"config/baseline.json")
     members=symbols_for(project_members(root),dataset.market,universe,dataset.frequency)
     if not members: raise ValueError("Unknown/empty universe")
@@ -49,6 +51,13 @@ def freeze_plan(root: Path, dataset: Dataset, universe: str, run_dir: Path) -> d
     period_ends={date.fromisoformat(x) for x in dataset.manifest["complete_period_ends"]}
     holdout=holdout_from_complete_sessions(complete,frequency=dataset.frequency,
         as_of=date.fromisoformat(dataset.manifest["as_of_date"]),audited_period_ends=period_ends)
+    for folder in (root/".private/pilots").glob("*"):
+        pilot=read_json(folder/"plan.json")
+        if (pilot and pilot.get("dataset_kind")=="yahoo_daily_pilot" and
+            pilot.get("market")==dataset.market and dataset.frequency=="daily"):
+            explored=_interval(pilot["interval"])
+            if holdout.start<explored.end and explored.start<holdout.end:
+                raise ValueError("Formal holdout overlaps an explored pilot interval")
     first_observation=min(b.start for b in dataset.bars)
     scope_start=datetime.fromisoformat(dataset.manifest.get("study_start",first_observation.isoformat()))
     if dataset.kind=="yahoo_audited" and dataset.frequency=="5m" and scope_start>first_observation:
@@ -93,6 +102,8 @@ def freeze_plan(root: Path, dataset: Dataset, universe: str, run_dir: Path) -> d
 def _interval(v):return Interval(date.fromisoformat(v["start"]),date.fromisoformat(v["end"]))
 
 def _check(root,dataset,plan):
+    if dataset.kind not in ("yahoo_audited","synthetic_fixture") or plan.get("research_scope")=="exploratory_existing25_daily":
+        raise ValueError("Pilot data cannot enter formal research or consume a holdout")
     config=read_json(root/"config/baseline.json")
     _validate_accounting(config,dataset,plan["members"])
     if dataset.digest!=plan["dataset_digest"] or fingerprint(config)!=plan["configuration_digest"]:
@@ -122,7 +133,7 @@ def _segment(config,dataset,plan,arm,parameters,interval,ledger=None,allow_entri
         market_timezone=plan["timezone"],arm=arm,allocation="fixed",
         signal_rules=SignalRules(**config["signal_rules"]),seed_method="sma_seed",
         increments=config["indicators"]["hist_increments"],delay_minutes=plan["delay_minutes"],scaled_base=None,planned_exits=events,
-        dataset_kind="synthetic" if dataset.kind=="synthetic_fixture" else "yahoo_audited",
+        dataset_kind="synthetic" if dataset.kind in ("synthetic_fixture","synthetic_pilot_fixture") else dataset.kind,
         audit_digest=dataset.digest,allow_entries=allow_entries,
         open_quotes=[q for q in dataset.open_quotes if q.ticker in plan["members"]],market=dataset.market,
         splits=[a for a in dataset.manifest.get("splits",[]) if a["ticker"] in plan["members"]],**parameters)
@@ -232,6 +243,8 @@ def freeze_final_selection(root,dataset,run_dir,*,arms=None):
     return frozen
 
 def consume_holdout(root,plan,run_dir):
+    if plan.get("dataset_kind") not in ("yahoo_audited","synthetic_fixture"):
+        raise ValueError("Pilot data cannot consume a formal holdout")
     if plan["dataset_kind"]=="yahoo_audited":
         key=fingerprint({k:plan[k] for k in ("market","frequency","universe","members","holdout")})
         registry=root/".private"/"holdout_registry"
