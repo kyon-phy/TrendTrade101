@@ -5,14 +5,14 @@ This is a concise evidence index, not the strategy authority or a claim that the
 ```json
 {
   "schema_version": 1,
-  "recorded_at": "2026-10-03T17:07:38+00:00",
+  "recorded_at": "2026-10-04T06:23:59+00:00",
   "verified_checkpoint": {
-    "commit": "ee743bb43c53c33784572a114a30bafe221e8e04",
+    "commit": "ee6ca122c38030b424615d4b85c7251192343215",
     "tests_passed": 93,
     "test_scope": "synthetic_software",
-    "ci_url": "https://github.com/kyon-phy/TrendTrade101/actions/runs/37135521443",
+    "ci_url": "https://github.com/kyon-phy/TrendTrade101/actions/runs/37139453759",
     "artifact_name": "research-dashboard",
-    "artifact_sha256": "2559267efa8b2171da71019ced7bb126f8c7fb5e02128a2959d6c8066024ffa3"
+    "artifact_sha256": "f5ec949844b9346665306c4861e26f9f614bb6a09028a27dc8d4d01b9ff955b5"
   },
   "configuration": {
     "version": "v0.13",
@@ -37,8 +37,9 @@ This is a concise evidence index, not the strategy authority or a claim that the
       "id": "yahoo_http_429",
       "status": "blocked",
       "observation_scope": "parent_observed_preflight",
-      "latest_observed_at": "2026-10-03T17:02:10Z",
-      "further_retry_authorized": false,
+      "latest_observed_at": "2026-10-04T06:15:27Z",
+      "executor_retry_authorized": false,
+      "preflight_coordination": "Parent owns dedicated preflight; no duplicate requests from this executor.",
       "evidence": "docs/network-access.md"
     },
     {
@@ -57,8 +58,8 @@ This is a concise evidence index, not the strategy authority or a claim that the
     "D003"
   ],
   "next_actions": [
-    "Resolve pending technical conventions through the canonical configuration owner; preserve proposed status until then.",
-    "Keep Yahoo requests paused: the parent observed HTTP 429 in a fresh environment after the hostname was allowed, including the one authorized delayed retry. No further retry is authorized; the exact limiting layer remains unknown. See D009 and the network evidence receipt.",
+    "Consolidate material split/share-unit and training/OOS/final-account choices through the canonical owner. Continue ordinary offline implementation verification without repeated routine approvals; pending strategy definitions remain pending.",
+    "Keep this executor's Yahoo requests paused: parent preflight still returned HTTP 429 on October 4 despite effective hostname authorization. Dedicated preflight stays coordinated with the parent; the exact limiting layer remains unknown. See D011 and the network evidence receipt.",
     "After authorized connectivity and actual data audits, freeze data/configuration/code and holdout dates; run baseline before optimization.",
     "At each material milestone, reconcile this index with actual Git, CI, artifacts and run evidence."
   ]
@@ -70,6 +71,6 @@ This is a concise evidence index, not the strategy authority or a claim that the
 - [Repository-local continuity skill](.agents/skills/maintain-project-context/SKILL.md) and [decision log](docs/decisions.md).
 - [Approved-rule public projection](config/inputs/TrendTrade101_Backtest_Configuration.md) and [original/public provenance](config/inputs/public_input_provenance.json).
 - [Pending technical bundle and JP alternative](docs/technical-conventions-v013.md), [network blocker](docs/network-access.md), and [data/run contract](docs/data-and-runs.md).
-- [Checkpoint CI and downloadable dashboard](https://github.com/kyon-phy/TrendTrade101/actions/runs/37135521443). HTML is a timestamped snapshot; no public live URL is verified. Local port availability must be checked after environment restarts.
+- [Checkpoint CI and downloadable dashboard](https://github.com/kyon-phy/TrendTrade101/actions/runs/37139453759). HTML is a timestamped snapshot; no public live URL is verified. Local port availability must be checked after environment restarts.
 
 No historical baseline, optimization or final-holdout result is claimed. The original input bytes were not verified here; the public derivatives were. No stock reselection is authorized.

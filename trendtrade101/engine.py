@@ -119,6 +119,10 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
                 decisions.append((b,signal))
                 inadequate_hump_bars+=bool(signal["inadequate_hump_history"])
                 undefined_histogram_bars+=reading.histogram is None
+        if decisions:
+            # A next bar can open at this same instant at a different price.
+            # Preserve the completed-Close valuation before any Open overwrites it.
+            curve.append(account_point(ledger,at))
         for action in actions[at]:
             ticker,ratio=action["ticker"],action["ratio"]
             if ticker in indicators:
@@ -156,7 +160,7 @@ def replay(bars: list[Bar], *, ledger: Ledger, start: datetime, end: datetime,
             ledger.execute(at,{b.ticker:b.open for b in opened[at]},
                            tax_year=at.astimezone(ZoneInfo(market_timezone)).year)
             curve.append(account_point(ledger,at))
-        elif at == end:
+        elif at == end and not decisions:
             curve.append(account_point(ledger,at))
     if curve[-1]["time"]!=end.isoformat():
         curve.append(account_point(ledger,end))

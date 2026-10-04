@@ -10,7 +10,9 @@ function render(s){
   $('membership').textContent=s.inputs.membership_count ?? '—';
   $('membership-note').textContent=s.inputs.membership_count ? s.inputs.unique_securities+' securities · '+s.inputs.verification_kind.replaceAll('_',' ') : '201 expected · bytes unverified';
   $('stages').replaceChildren(...s.stages.map((x,i)=>{
-    const e=node('div','','stage'); e.append(node('span',String(i+1).padStart(2,'0'),'step'),node('span',x.name,'stage-name'),node('span',x.detail,'stage-detail'),node('span',x.status.replaceAll('_',' '),'badge '+x.status));return e;
+    const observation=x.id==='data_audit'?s.provider_preflight:null;
+    const detail=x.detail+(observation?.observed_at?' Observation: '+observation.observed_at+' · '+observation.scope+'.':'');
+    const e=node('div','','stage'); e.append(node('span',String(i+1).padStart(2,'0'),'step'),node('span',x.name,'stage-name'),node('span',detail,'stage-detail'),node('span',x.status.replaceAll('_',' '),'badge '+x.status));return e;
   }));
   $('files').replaceChildren(...s.inputs.files.map(f=>{
     const e=node('div','','file'), h=node('div','','file-head');

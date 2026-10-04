@@ -177,3 +177,50 @@ This incremental log begins with checked repository evidence and the current nar
   "supersedes": "D004"
 }
 ```
+
+## D010
+
+```json
+{
+  "id": "D010",
+  "recorded_at": "2026-10-04T06:23:59+00:00",
+  "domain": "workflow",
+  "status": "approved",
+  "summary": "Project-owner authorization permits autonomous ordinary reversible troubleshooting, tests and scoped publication. Consolidate genuinely material decisions; do not request repeated routine approvals. This does not approve pending strategy definitions, paid data, security changes, production-monitor changes, trades or duplicate provider requests. Dedicated Yahoo preflight stays with the parent.",
+  "authorization_basis": "Current explicit project-owner task authorization; no private transcript retained.",
+  "evidence": ["AGENTS.md", "docs/technical-conventions-v013.md"],
+  "pending_fields": [],
+  "supersedes": null
+}
+```
+
+## D011
+
+```json
+{
+  "id": "D011",
+  "recorded_at": "2026-10-04T06:23:59+00:00",
+  "domain": "data",
+  "status": "blocked",
+  "summary": "Parent-observed preflight at 2026-10-04T06:15:27Z, 13 hours 13 minutes 17 seconds after the previous retry, returned HTTP 429 with Edge: Too Many Requests and no Retry-After. Hostname authorization is effective; failure precedes price-data parsing. Exact limiting layer remains unknown. No data or historical result was obtained, and this executor made no duplicate request. Retain prior observations and keep dedicated preflight coordinated with the parent.",
+  "observation_scope": "parent_observed_preflight",
+  "evidence": ["docs/network-access.md", "config/project_status.json"],
+  "pending_fields": [],
+  "supersedes": "D009"
+}
+```
+
+## D012
+
+```json
+{
+  "id": "D012",
+  "recorded_at": "2026-10-04T06:23:59+00:00",
+  "domain": "software",
+  "status": "implemented",
+  "summary": "Preserve completed-Close valuations before simultaneous Opens; reconcile provider observations by their own timestamps; keep preflight success distinct from completed data auditing; expose bounded HTTP/connection diagnostics without retries. Synthetic regressions reproduce the omitted drawdown and stale-status failures. Canonical v0.13, fixed memberships, pending split/account decisions and the real-run lock remain unchanged.",
+  "evidence": ["trendtrade101/engine.py", "trendtrade101/readiness.py", "trendtrade101/provider.py", "tests/test_execution_audit.py", "tests/test_status_observations.py", "tests/test_provider.py", "docs/technical-conventions-v013.md"],
+  "pending_fields": [],
+  "supersedes": null
+}
+```

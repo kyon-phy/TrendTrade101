@@ -1,8 +1,15 @@
 {
-  "reported_at": "2026-10-03T13:47:06.386883+00:00",
-  "scope": "Saved cloud research environment",
+  "reported_at": "2026-10-04T06:15:27Z",
+  "scope": "Parent-observed preflight in the environment with the allowed Yahoo hostname",
   "provider_preflight": {
     "status": "blocked",
-    "message": "Saved cloud environment: Yahoo CONNECT denied with HTTP 403. query1.finance.yahoo.com is absent from the inspected egress allowlist. No further price requests attempted."
+    "message": "Parent-observed preflight at 2026-10-04 06:15:27 UTC: the same NVDA request returned HTTP 429, Edge: Too Many Requests, with no Retry-After. Hostname authorization is effective; the exact limiting layer is unknown. Real-data research remains blocked. Further preflight work is coordinated separately; this executor makes no duplicate request.",
+    "observed_at": "2026-10-04T06:15:27Z",
+    "http_status": 429,
+    "failure_stage": "http_response_before_json",
+    "retry_after": null,
+    "limiting_layer": "unknown",
+    "retry_policy": "stop_no_automatic_retry",
+    "evidence": "docs/network-access.md"
   }
 }

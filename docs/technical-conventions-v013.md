@@ -56,7 +56,7 @@ These fixes enforce selected rules or expose missing evidence. They do not selec
 
 ## Evidence still required before historical execution
 
-The managed network denial remains unchanged; no additional Yahoo requests were made for this review. Full-universe capture, maximum-history verification, missing/null/terminal observations, lunch/auction/short sessions, all IPO identities, delistings/actions, legal units and exact holdout dates remain unaudited. A review receipt must identify actual evidence; setting a boolean does not create it. Daily study-start audit must demonstrate the five-year target rather than treating arbitrary downloaded history as the approved scoring horizon.
+See the dated [network evidence](network-access.md) for the current parent-observed HTTP 429; this executor issued no additional Yahoo requests for the implementation reviews. Full-universe capture, maximum-history verification, missing/null/terminal observations, lunch/auction/short sessions, all IPO identities, delistings/actions, legal units and exact holdout dates remain unaudited. A review receipt must identify actual evidence; setting a boolean does not create it. Daily study-start audit must demonstrate the five-year target rather than treating arbitrary downloaded history as the approved scoring horizon.
 
 A positive finite Open remains an execution proxy, not proof of liquidity during a halt. Eventual bar volume cannot filter an earlier fill. Zero/missing-volume reporting is available; a broader low-liquidity threshold remains unselected and must not become a hidden trade filter.
 
@@ -67,3 +67,15 @@ Real research remains locked until the designated configuration writer synchroni
 The saved cloud environment serves the read-only console on local port 8765. That address is local, and no public live URL has been configured or verified. A platform-provided authenticated port preview may be used if the environment exposes one; do not guess its URL or assume it exists.
 
 The successful Tests workflow publishes a self-contained `research-dashboard` HTML artifact. Download, unzip and open it to view a timestamped snapshot without a server. The existing Library HTML is also a snapshot. Neither route is a public real-time feed. GitHub Pages or another hosting deployment would be separate hosting setup; it is not necessary to unblock data research and must not be claimed as already configured.
+
+## Offline troubleshooting update: 2026-10-04
+
+Current authorization permits ordinary reversible implementation fixes and verification. It does not approve unresolved strategy definitions. The latest canonical document was read as v0.13; its configuration, universe and real-execution lock remain unchanged.
+
+- Completed Close marks were overwritten when the next bar opened at the same timestamp. The engine now records the Close valuation before processing that Open. A synthetic held-position case with Close 80 followed by Open 100 now retains the 20% drawdown instead of reporting zero. This repairs the already documented valuation implementation; it does not select a new valuation convention or publish a historical result. Equal timestamps have deterministic event order and zero elapsed time between them for utilization weighting.
+- Provider-status selection uses the observation's own aware timestamp, independently of software-test timestamps. Invalid/naive timestamps cannot supersede dated evidence. Connectivity success remains separate from completed data auditing. These are evidence-display conventions, not trading rules.
+- HTTP response diagnostics distinguish a received 429 from a connection-stage denial, retain bounded response evidence, and stop without automatic retry. Transport tests are mocked, preserving the original endpoint, user agent and request parameters.
+
+The material questions are consolidated: historical tradable split/share units versus normalized quantities, and training/OOS/final account continuity. The recommendation remains historical executable units with evidence-backed action handling; flat training accounts, continuous ordinary OOS accounts, and separate fresh final accounts. Unsupported fractional/odd-lot entitlements and non-split distributions remain blocked pending concrete evidence and treatment.
+
+Existing deterministic EMA/ADX initialization, valid-bar gap handling, per-arm readiness, event serialization and full-window checks can be inspected and tested offline without another routine permission request. They remain explicitly described implementation conventions, with canonical synchronization required before dependent real execution. No new common warmup gate, gap filling, parameter axis, eligibility filter or data interpretation is enabled by this troubleshooting update. JP ADX sizing remains an inactive alternative and does not block fixed-1/15 research.

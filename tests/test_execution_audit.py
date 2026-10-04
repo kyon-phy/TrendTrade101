@@ -4,7 +4,7 @@ from unittest.mock import patch
 from trendtrade101.audit import audit_chart
 from trendtrade101.engine import Bar,OpenQuote,replay
 from trendtrade101.indicators import Reading
-from trendtrade101.portfolio import Ledger,LedgerPolicy
+from trendtrade101.portfolio import Ledger,LedgerPolicy,Position
 from trendtrade101.signals import SignalRules
 from trendtrade101.timing import Session
 
@@ -21,6 +21,21 @@ def replay_args(ledger):
         planned_exits=[],dataset_kind="synthetic")
 
 class ExecutionAuditTests(unittest.TestCase):
+    def test_completed_close_is_valued_before_the_next_simultaneous_open(self):
+        ledger=account()
+        ledger.cash=0
+        ledger.positions["AAA"]=Position(1000,100000,100000,T)
+        ledger.mark("AAA",100)
+        boundary=T+timedelta(minutes=5)
+        bars=[Bar("AAA",T,boundary,100,100,80,80,1000)]
+        result=replay(bars,start=T,end=T+timedelta(minutes=10),allow_entries=False,
+            open_quotes=[OpenQuote("AAA",T,100),OpenQuote("AAA",boundary,100)],
+            **replay_args(ledger))
+        marks=[p["equity"] for p in result["equity"] if p["time"]==boundary.isoformat()]
+        self.assertEqual(marks,[80000,100000])
+        self.assertAlmostEqual(result["metrics"]["max_drawdown"],.2)
+        self.assertEqual(ledger.equity,100000)
+
     def test_null_future_close_does_not_remove_an_observed_open(self):
         payload={"chart":{"result":[{"timestamp":[int(T.timestamp())],"indicators":{"quote":[
             {"open":[100],"high":[None],"low":[None],"close":[None],"volume":[None]}]}}]}}
